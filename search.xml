@@ -258,7 +258,8 @@
 <h1 id="小結"><a href="#小結" class="headerlink" title="小結"></a>小結</h1><p>之前在聽talk的時候常常有人說 “Data的project常常需要花80%的時間去做data wrangling”, 這句話其實並不假. 但是如果在做一些warehousing或是data product的時候能夠先把這類的mindset考慮進去的話, 我想是有機會把80%再縮短一點的XD, 或是其他專案可以reuse這個的結果是可以增加分析或是學習專案做探索的效率很多的.<br>寫完的感想<br>其實要把這類的事情寫清楚還是覺得複雜度很高, 尤其這個主題又好像大家都知道但很少人寫 在寫的時候其實要釐清很多事情XD(像是問題通常是哪一類型, 應該要怎麼寫等等的). 在寫紀錄的路上繼續努力QQ</p>
 ]]></content>
       <tags>
-        <tag>data, machine-learning</tag>
+        <tag>machine-learning</tag>
+        <tag>data</tag>
       </tags>
   </entry>
   <entry>
