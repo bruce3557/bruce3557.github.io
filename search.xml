@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>machine-learning-practical-stacking-ensemble-小整理</title>
+    <title>Machine Learning Practical - Stacking Ensemble 小整理</title>
     <url>/2020/03/29/machine-learning-practical-stacking-ensemble-%E5%B0%8F%E6%95%B4%E7%90%86/</url>
     <content><![CDATA[<p>最近在工作的時候小K了一些stacking ensemsble的技巧, 感覺整理一下整個思路大概是怎麼樣好像是一個不錯的選擇</p>
 <h1 id="Ensemble-Learning-簡介"><a href="#Ensemble-Learning-簡介" class="headerlink" title="Ensemble Learning 簡介"></a>Ensemble Learning 簡介</h1><p>基本上用一句話來形容就是: “3個臭皮匠勝過一個諸葛亮”. 原因對每個模型來說你可以把它當成是一個人對某件事物的看法, 舉例來說: 一個人看一份履歷決定要不要面試他, 就算是這個人非常厲害好了, 還是有可能會有bias (像是frontend的人可能不一定對backend的好壞有特別的感覺). ensemble learning想解決的就是類似的事情, 透過訓練多個模型(人)從某些方式綜合起來的去下一個最終的結論. 通常這種方式得到的模型會比較穩定而且具有全局觀.<br>而主要在做ensemble learning的方式可以分成下面三種:</p>
