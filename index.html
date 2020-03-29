@@ -148,6 +148,128 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="http://bruce3557.github.io/2020/03/29/beautiful-machine-learning-pipeline-with-scikit-learn/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="bruce3557">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="魯斯雜想">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/03/29/beautiful-machine-learning-pipeline-with-scikit-learn/" class="post-title-link" itemprop="url">Beautiful Machine Learning Pipeline with Scikit Learn</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+              
+
+              <time title="創建時間：2020-03-29 15:40:32 / 修改時間：15:41:34" itemprop="dateCreated datePublished" datetime="2020-03-29T15:40:32+08:00">2020-03-29</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>Doing feature engineering is the most complex part when applying machine learning to your product. This note aims to give better manners when using scikit-learn to do feature engineering and machine learning based my personal experience.</p>
+<p>Before introducing my strategies, let’s review common feature engineering problems first:</p>
+<ul>
+<li>handling missing values</li>
+<li>nomarlization / standardization</li>
+<li>featuree interaction</li>
+<li>label encoding</li>
+<li>one hot encoding</li>
+</ul>
+<p>When starting feature engineering part in developing a machine learning model, we usually need to try many possible solutions and iterate different possible combinations of feature tricks quickly. There are many articles talking about how to do above feature engineering works. But when you want to apply different approaches to different features, you may write complicated code to do feature engineering. The code may contains multiple numpy / scipy transformation and feed back into scikit learn pipelines. It causes the code is not easy to maintain and hard to debug when problem occurs. In this article, I want to introduce multiple tricks in scikit-learn to build up a machine learning model pipeline that covers:</p>
+<ul>
+<li>feature engineering on different columns</li>
+<li>ensemble learning with customized transformers</li>
+<li>deep learning API with complicated feature pipeline</li>
+</ul>
+<p>We define some code snippets about input / output data here before we talk about the detail:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">train_data = pd.read_csv(<span class="string">"input_data.csv"</span>)</span><br><span class="line">train_labels = pd.read_csv(<span class="string">"input_labels.cs v"</span>)</span><br><span class="line">predict_data = pd.read_csv(<span class="string">"predict_data.csv"</span>)</span><br></pre></td></tr></table></figure>
+
+<h1 id="Idea-1-Naive-Feature-Engineering"><a href="#Idea-1-Naive-Feature-Engineering" class="headerlink" title="Idea 1. Naive Feature Engineering"></a>Idea 1. Naive Feature Engineering</h1><p>Let’s see how to do simple feature engineering if you don’t apply pipeline.</p>
+<h2 id="Code-Example"><a href="#Code-Example" class="headerlink" title="Code Example"></a>Code Example</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">pca_transform = PCA(n_components=<span class="number">10</span>)</span><br><span class="line">pca_transform.fit(train_data.values)</span><br><span class="line">pca_transform_data = pca_transform.transform(train_data.values)</span><br><span class="line"></span><br><span class="line">nmf_transform = NMF()</span><br><span class="line">nmf_transform.fit(train_data.values)</span><br><span class="line">nmf_transform_data = nmf_transform.transform(train_data.values)</span><br><span class="line"></span><br><span class="line">union_data = np.hstack(nmf_transform_data, pca_transform_data)</span><br><span class="line"></span><br><span class="line">model = RandomForestClassifier()</span><br><span class="line">model.fit(union_data, train_labels.values)</span><br><span class="line"></span><br><span class="line">pca_transform_predict_data = pca_transform.transform(predict_data.values)</span><br><span class="line">nmf_transform_predict_data = nmf_transform.transform(predict_data.values)</span><br><span class="line">union_predict_data = np.hstack(</span><br><span class="line">	pca_transform_predict_data, nmf_transform_predict_data)</span><br><span class="line">predictions = model.predict(union_predict_data)</span><br></pre></td></tr></table></figure>
+<p>As you can see, this is pretty intuitive implementation if you want to apply some feature engineering tricks on your data. But you can imagine that the code will grow into a messy monster if you apply many tricks and to different features.</p>
+<h2 id="Pros"><a href="#Pros" class="headerlink" title="Pros"></a>Pros</h2><ul>
+<li>Naive implementation</li>
+</ul>
+<h2 id="Cons"><a href="#Cons" class="headerlink" title="Cons"></a>Cons</h2><ul>
+<li>Need to care many details with numpy / scipy interface</li>
+<li>Have many duplicate code to do similar things</li>
+</ul>
+<h1 id="Idea-2-Scikit-Learn-Model-Pipeline"><a href="#Idea-2-Scikit-Learn-Model-Pipeline" class="headerlink" title="Idea 2. Scikit Learn Model Pipeline"></a>Idea 2. Scikit Learn Model Pipeline</h1><p>To make the whole operation more clean, scikit-learn provides <a href="https://scikit-learn.org/stable/modules/generated/sklearn.pipeline.Pipeline.html#sklearn.pipeline.Pipeline" target="_blank" rel="noopener">pipeline API</a> to let user create a machine learning pipeline without caring about detail stuffs. </p>
+<h2 id="Code-Example-1"><a href="#Code-Example-1" class="headerlink" title="Code Example"></a>Code Example</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">model_pipeline = Pipeline(steps=[</span><br><span class="line">	(<span class="string">"dimension_reduction"</span>, PCA(n_components=<span class="number">10</span>)),</span><br><span class="line">	(<span class="string">"classifiers"</span>, RandomForestClassifier())</span><br><span class="line">])</span><br><span class="line"></span><br><span class="line">model_pipeline.fit(train_data.values, train_labels.values)</span><br><span class="line">predictions = model_pipeline.predict(predict_data.values)</span><br></pre></td></tr></table></figure>
+
+<h2 id="Pros-1"><a href="#Pros-1" class="headerlink" title="Pros"></a>Pros</h2><ul>
+<li>Get rid of handling details between two stages.</li>
+<li>Code is easy to maintain</li>
+</ul>
+<h2 id="Cons-1"><a href="#Cons-1" class="headerlink" title="Cons"></a>Cons</h2><ul>
+<li>If you use this implementation, only apply 1 type of transformation to given features. But this is the first step to make your pipeline more elegant.</li>
+</ul>
+<h1 id="Idea-3-Feature-Union-with-Pipeline"><a href="#Idea-3-Feature-Union-with-Pipeline" class="headerlink" title="Idea 3. Feature Union with Pipeline"></a>Idea 3. Feature Union with Pipeline</h1><p>If you want to apply different feature processing features on your dataset. You can try <a href="https://scikit-learn.org/stable/modules/generated/sklearn.pipeline.FeatureUnion.html" target="_blank" rel="noopener">Feature Union API</a>. The API provides simple way to merge arrays from different types transformation. Here is the code snippets if you want to use it:</p>
+<h2 id="Code-Example-2"><a href="#Code-Example-2" class="headerlink" title="Code Example"></a>Code Example</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">model_pipeline = Pipeline(steps=[</span><br><span class="line">	(<span class="string">"feature_union"</span>, FeatureUnion([</span><br><span class="line">		(<span class="string">"pca"</span>, PCA(n_components=<span class="number">1</span>)),</span><br><span class="line">		(<span class="string">"svd"</span>, TruncatedSVD(n_components=<span class="number">2</span>))</span><br><span class="line">	])),</span><br><span class="line">	(<span class="string">"classifiers"</span>, RandomForestClassifier())</span><br><span class="line">])</span><br><span class="line"></span><br><span class="line">model_pipeline.fit(train_data.values, train_labels.values)</span><br><span class="line">predictions = model_pipeline.predict(predict_data.values)</span><br></pre></td></tr></table></figure>
+
+<h2 id="Pros-2"><a href="#Pros-2" class="headerlink" title="Pros"></a>Pros</h2><ul>
+<li>Use different feature transformer without seperating your code into several parts and compose them.</li>
+</ul>
+<h2 id="Cons-2"><a href="#Cons-2" class="headerlink" title="Cons"></a>Cons</h2><ul>
+<li>Cannot apply different transformation by different features</li>
+<li>Cannot direct send pandas dataframe and use dict-like way to access data in your pipeline.</li>
+</ul>
+<h1 id="Idea-4-Idea-3-Column-Transformer"><a href="#Idea-4-Idea-3-Column-Transformer" class="headerlink" title="Idea 4. Idea 3 + Column Transformer"></a>Idea 4. Idea 3 + Column Transformer</h1><p>With <strong>Idea 3</strong>, you can easily implement your pipeline with different transformation. But there are two problems we mentioned above, we try to solve those problems and find a <a href="https://scikit-learn.org/stable/modules/generated/sklearn.compose.ColumnTransformer.html" target="_blank" rel="noopener">Column Transformer API</a> after survey different materials. I pretty like this API because it makes you can simplify your pipeline like configuration and train / predict your data with a simple command.</p>
+<h2 id="Code-Example-3"><a href="#Code-Example-3" class="headerlink" title="Code Example"></a>Code Example</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line">model_pipeline = Pipeline(steps=[</span><br><span class="line">	(<span class="string">"features"</span>, FeatureUnion([</span><br><span class="line">		(</span><br><span class="line">			<span class="string">"numerical_features"</span>,</span><br><span class="line">			ColumnTransformer([</span><br><span class="line">				(</span><br><span class="line">					<span class="string">"numerical"</span>,</span><br><span class="line">					Pipeline(steps=[(</span><br><span class="line">						<span class="string">"impute_stage"</span>,</span><br><span class="line">						SimpleImputer(missing_values=np.nan, strategy=<span class="string">"median"</span>,)</span><br><span class="line">					)]),</span><br><span class="line">					[<span class="string">"feature_1"</span>]</span><br><span class="line">				)</span><br><span class="line">			])</span><br><span class="line">		), (</span><br><span class="line">			<span class="string">"categorical_features"</span>,</span><br><span class="line">			ColumnTransformer([</span><br><span class="line">				(</span><br><span class="line">					<span class="string">"country_encoding"</span>,</span><br><span class="line">					Pipeline(steps=[</span><br><span class="line">						(<span class="string">"ohe"</span>, OneHotEncoder(handle_unknown=<span class="string">"ignore"</span>)),</span><br><span class="line">						(<span class="string">"reduction"</span>, NMF(n_components=<span class="number">8</span>)),</span><br><span class="line">					]),</span><br><span class="line">					[<span class="string">"country"</span>],</span><br><span class="line">				),</span><br><span class="line">			])</span><br><span class="line">		), (</span><br><span class="line">			<span class="string">"text_features"</span>,</span><br><span class="line">			ColumnTransformer([</span><br><span class="line">				(</span><br><span class="line">					<span class="string">"title_vec"</span>,</span><br><span class="line">					Pipeline(steps=[</span><br><span class="line">						(<span class="string">"tfidf"</span>, TfidfVectorizer()),</span><br><span class="line">						(<span class="string">"reduction"</span>, NMF(n_components=<span class="number">50</span>)),</span><br><span class="line">					]),</span><br><span class="line">					<span class="string">"title"</span></span><br><span class="line">				)</span><br><span class="line">			])</span><br><span class="line">		)</span><br><span class="line">	])),</span><br><span class="line">	(<span class="string">"classifiers"</span>, RandomForestClassifier())</span><br><span class="line">])</span><br><span class="line"></span><br><span class="line">model_pipeline.fit(train_data, train_labels.values)</span><br><span class="line">predictions = model_pipeline.predict(predict_data)</span><br></pre></td></tr></table></figure>
+
+<h2 id="Pros-3"><a href="#Pros-3" class="headerlink" title="Pros"></a>Pros</h2><p>All data transformation can be integrated into a model pipeline and easy to maintain. You can separate differet types of data such as numerical data and categorical data and process them in different methods.</p>
+<h2 id="Cons-3"><a href="#Cons-3" class="headerlink" title="Cons"></a>Cons</h2><p>I can’t find any difficulty if we used such kind of implementation on feature engineering.</p>
+<hr>
+<h1 id="More-tricks-in-your-pipeline"><a href="#More-tricks-in-your-pipeline" class="headerlink" title="More tricks in your pipeline"></a>More tricks in your pipeline</h1><p>With above tricks, you can create a machine learning pipeline elegantly. Here I want to introduce some advanced tricks, it covers:</p>
+<ul>
+<li>how to do stacking ensemble learning in your pipeline</li>
+<li>how to integrate keras in your pipeline</li>
+</ul>
+<h2 id="Stacking-ensemble-methods-in-a-pipeline"><a href="#Stacking-ensemble-methods-in-a-pipeline" class="headerlink" title="Stacking ensemble methods in a pipeline"></a>Stacking ensemble methods in a pipeline</h2><p>As you know, we usually want to use stacking method to avoid bias from one specific method. If you still a newbie of stacking learning, you can read <a href="http://blog.kaggle.com/2016/12/27/a-kagglers-guide-to-model-stacking-in-practice/" target="_blank" rel="noopener">this tutorial</a> first. So when implementing stacking methods, the question is: how to make stacking method as one step in your pipeline? I read <a href="http://zacstewart.com/2014/08/05/pipelines-of-featureunions-of-pipelines.html" target="_blank" rel="noopener">this material</a> and the spirit to create the step is building a customized transformer class .<br>The implementation here is not the perfect one but a good starting material to let us expand.</p>
+<h2 id="Quickly-adapt-neural-network-model-with-Keras-API"><a href="#Quickly-adapt-neural-network-model-with-Keras-API" class="headerlink" title="Quickly adapt neural network model with Keras API"></a>Quickly adapt neural network model with Keras API</h2><p><a href="https://keras.io/scikit-learn-api/" target="_blank" rel="noopener">Keras Scikit-Learn API</a> provides a simple way to let you integrate your neural network model with scikit learn API. You can quickly implement your keras model and integrate with your custom pipeline as one step in your pipeline object.</p>
+<p>But there is a drawback is that the steps outside neural networks cannot be optimized by neural network. You still need to optimized your feature engineering part by yourself but it can handle data preprocessing part if you want to use neural network in your pipeline. Another point is that I haven’t try to implement the pipeline if my neural network part is multiple input, so I have no idea about how to integrate multi-inputs neural network in a scikit-learn pipeline.</p>
+<hr>
+<h1 id="Conclusion"><a href="#Conclusion" class="headerlink" title="Conclusion"></a>Conclusion</h1><p>This is just simple introduction to give a thought how to do feature engineering in an elegant way. I believe there are still many awesome tricks can help us create machine learning pipelines with simple code. With survey the documentation and API design in scikit-learn, I enjoy their thoughts on machine learning development and think that is pretty worth to follow them.</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
     <link itemprop="mainEntityOfPage" href="http://bruce3557.github.io/2020/03/29/graceful-data-ingestion-with-sqlalchemy-and-pands/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -694,12 +816,12 @@ and these 4 packages also have their requirement packages, a package management 
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">5</span>
+          <span class="site-state-item-count">6</span>
           <span class="site-state-item-name">文章</span>
         </a>
       </div>
       <div class="site-state-item site-state-tags">
-        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-count">6</span>
         <span class="site-state-item-name">標籤</span>
       </div>
   </nav>
