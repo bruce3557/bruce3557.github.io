@@ -567,7 +567,8 @@
 <p>意外發現google release的原始碼實在是很好追(只要找到進入點, comment寫得很完整, 程式的架構也很好, 值得好好學習QQ), 下次在GCP上面遇到類似的問題可以嘗試直接追原始碼看看會不會比較快得到方向及真正的做法.</p>
 ]]></content>
       <tags>
-        <tag>python, bigquery</tag>
+        <tag>python</tag>
+        <tag>bigquery</tag>
       </tags>
   </entry>
   <entry>
