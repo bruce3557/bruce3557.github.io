@@ -381,7 +381,9 @@
 </ul>
 ]]></content>
       <tags>
-        <tag>python, github, heroku</tag>
+        <tag>python</tag>
+        <tag>github</tag>
+        <tag>heroku</tag>
       </tags>
   </entry>
   <entry>
@@ -503,7 +505,9 @@
 <p>But in single-machine size data, using pandas + SQLAlchemy is a powerful way to solve the data ingestion problem enough!</p>
 ]]></content>
       <tags>
-        <tag>pandas, sqlalchemy, python</tag>
+        <tag>python</tag>
+        <tag>pandas</tag>
+        <tag>sqlalchemy</tag>
       </tags>
   </entry>
   <entry>
@@ -593,7 +597,9 @@
 
 ]]></content>
       <tags>
-        <tag>python, scikit-learn, gcs</tag>
+        <tag>python</tag>
+        <tag>scikit-learn</tag>
+        <tag>gcs</tag>
       </tags>
   </entry>
   <entry>
