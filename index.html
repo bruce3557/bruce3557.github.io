@@ -148,6 +148,106 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="http://bruce3557.github.io/2020/03/29/graceful-data-ingestion-with-sqlalchemy-and-pands/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="bruce3557">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="魯斯雜想">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/03/29/graceful-data-ingestion-with-sqlalchemy-and-pands/" class="post-title-link" itemprop="url">Graceful Data Ingestion with SQLAlchemy and Pandas</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+              
+
+              <time title="創建時間：2020-03-29 15:37:47 / 修改時間：15:38:38" itemprop="dateCreated datePublished" datetime="2020-03-29T15:37:47+08:00">2020-03-29</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>When the data size is not large enough to use distributed computing frameworks (like Apache Spark), processing data in a machine with pandas is an efficient way. But how to insert data with dataframe object in an elegant way is a big challenge. As we know, python has a good database tookit <a href="https://www.sqlalchemy.org/" target="_blank" rel="noopener">SQLAlchemy</a> with good ORM integration and a good data processing library <a href="https://pandas.pydata.org/" target="_blank" rel="noopener">Pandas</a>. Here we explore some different implementations and discuss the pros and cons in this article.</p>
+<h2 id="Problem"><a href="#Problem" class="headerlink" title="Problem"></a>Problem</h2><p>With a pandas dataframe with thousands data and complex data type. How to load the data into target database fast and the code should be easy to maintain.</p>
+<p><strong>Note. Here we use PostgreSQL as the target database.</strong></p>
+<hr>
+<h2 id="Simple-Idea-Use-Pandas-df-to-sql-function"><a href="#Simple-Idea-Use-Pandas-df-to-sql-function" class="headerlink" title="Simple Idea - Use Pandas df.to_sql function"></a>Simple Idea - Use Pandas <code>df.to_sql</code> function</h2><p>With this function, you can insert your data with pandas API <a href="https://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.to_sql.html" target="_blank" rel="noopener">df.to_sql</a>, then you done the work!</p>
+<h3 id="Advantages"><a href="#Advantages" class="headerlink" title="Advantages"></a>Advantages</h3><p>Easiest way to implement.</p>
+<h3 id="Drawbacks"><a href="#Drawbacks" class="headerlink" title="Drawbacks"></a>Drawbacks</h3><ul>
+<li>Very slow!</li>
+<li>If you need to truncate the table first, it is not a smart way to use the function.</li>
+</ul>
+<hr>
+<h2 id="Another-Simple-Idea-Inserting-Data-With-CSV-Files"><a href="#Another-Simple-Idea-Inserting-Data-With-CSV-Files" class="headerlink" title="Another Simple Idea - Inserting Data With CSV Files"></a>Another Simple Idea - Inserting Data With CSV Files</h2><p>Another naive idea to solve this problem is to output dataframe as a CSV file and use <code>copy</code> command or the same implementation in python to import data into database.<br>Following is the code example:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">bulkload_csv_data_to_database</span><span class="params">(engine, tablename, columns, data, sep=<span class="string">","</span>)</span>:</span></span><br><span class="line">    logging.info(<span class="string">"Start ingesting data into postgres ..."</span>)</span><br><span class="line">    logging.info(<span class="string">"Table name: &#123;table&#125;"</span>.format(table=tablename))</span><br><span class="line">    logging.info(<span class="string">"CSV schema: &#123;schema&#125;"</span>.format(schema=columns))</span><br><span class="line">    conn = engine.connect().connection</span><br><span class="line">    cursor = conn.cursor()</span><br><span class="line">    cursor.copy_from(data, tablename, columns=columns, sep=sep, null=<span class="string">'null'</span>)</span><br><span class="line">    conn.commit()</span><br><span class="line">    conn.close()</span><br><span class="line">    logging.info(<span class="string">"Finish ingesting"</span>)</span><br><span class="line"></span><br><span class="line">df.to_csv(csv_path, index=<span class="literal">False</span>, header=<span class="literal">False</span>)</span><br><span class="line">buldload_csv_data_to_database(engine, tablename, columns, data)</span><br></pre></td></tr></table></figure>
+
+<h3 id="Advantages-1"><a href="#Advantages-1" class="headerlink" title="Advantages"></a>Advantages</h3><p>The loading speed is fast!</p>
+<h3 id="Drawbacks-1"><a href="#Drawbacks-1" class="headerlink" title="Drawbacks"></a>Drawbacks</h3><p>Need to maintain and process data to CSV format that the target database library recognizes it. It goes crazy when your schema is pretty complicated (think about the data with json fields and arrays …). You’ll need to consider the format between <code>df.to_csv</code> and <code>cursor.copy_from</code> very carefully.</p>
+<hr>
+<h2 id="Third-Idea-Insert-Data-by-SQLAlchemy-ORM"><a href="#Third-Idea-Insert-Data-by-SQLAlchemy-ORM" class="headerlink" title="Third Idea - Insert Data by SQLAlchemy ORM"></a>Third Idea - Insert Data by SQLAlchemy ORM</h2><p>To get rid of the huge effort to maintain the CSV format, another solution is to use the same method in web: creating a table object with pandas row and add the object to a session one by one. Following is a simple example:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Session = sessionmaker(bind=conn)</span><br><span class="line">session = Session()</span><br><span class="line"><span class="keyword">for</span> _, row <span class="keyword">in</span> df.iterrows():</span><br><span class="line">	user = User(name=row[<span class="string">"name"</span>])</span><br><span class="line">	session.add(user)</span><br><span class="line">session.commit()</span><br><span class="line">session.close()</span><br></pre></td></tr></table></figure>
+
+<h3 id="Advantages-2"><a href="#Advantages-2" class="headerlink" title="Advantages"></a>Advantages</h3><ul>
+<li>Easy to maintain</li>
+<li>Enjoy ORM’s advantages</li>
+</ul>
+<h3 id="Drawbacks-2"><a href="#Drawbacks-2" class="headerlink" title="Drawbacks"></a>Drawbacks</h3><ul>
+<li>Slow, because it need to execute clause one by one.</li>
+</ul>
+<hr>
+<h2 id="Fourth-Idea-Insert-Data-with-Pandas-and-SQLAlchemy-ORM"><a href="#Fourth-Idea-Insert-Data-with-Pandas-and-SQLAlchemy-ORM" class="headerlink" title="Fourth Idea - Insert Data with Pandas and SQLAlchemy ORM"></a>Fourth Idea - Insert Data with Pandas and SQLAlchemy ORM</h2><p>With exploration on SQLAlchemy document, we found there are <a href="https://docs.sqlalchemy.org/en/latest/orm/persistence_techniques.html#bulk-operations" target="_blank" rel="noopener">bulk operations</a> in SQLAlchemy ORM component. In this document, we found <code>bulk_insert_mappings</code> can use list of dictionary with mappings. With this, we can easily develop bulk insert and maintainable code with pandas dataframe.</p>
+<p>Here is the code example:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Session = sessionmaker(bind=dest_db_con)</span><br><span class="line">session = Session()</span><br><span class="line">session.bulk_insert_mappings(MentorInformation, df.to_dict(orient=<span class="string">"records"</span>))</span><br><span class="line">session.close()</span><br></pre></td></tr></table></figure>
+
+<h3 id="Advantages-3"><a href="#Advantages-3" class="headerlink" title="Advantages"></a>Advantages</h3><ul>
+<li>Fast</li>
+<li>Simple</li>
+<li>Easy to maintain</li>
+<li>Enjoy ORM’s advantages</li>
+</ul>
+<h3 id="Drawbacks-3"><a href="#Drawbacks-3" class="headerlink" title="Drawbacks"></a>Drawbacks</h3><p>No concern from my point.</p>
+<hr>
+<h2 id="Conclusion-amp-Discussion"><a href="#Conclusion-amp-Discussion" class="headerlink" title="Conclusion &amp; Discussion"></a>Conclusion &amp; Discussion</h2><p>Because pandas can only process data in a machine, how to solve the same problem in distributed environments is worthwhile to think also. There are many frameworks like Apache Spark to solve the extended problem. </p>
+<p>But in single-machine size data, using pandas + SQLAlchemy is a powerful way to solve the data ingestion problem enough!</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
     <link itemprop="mainEntityOfPage" href="http://bruce3557.github.io/2020/03/29/access-dataflow-template-pipeline-with-gcp-rest-api/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -173,7 +273,7 @@
               <span class="post-meta-item-text">發表於</span>
               
 
-              <time title="創建時間：2020-03-29 15:34:16 / 修改時間：15:35:02" itemprop="dateCreated datePublished" datetime="2020-03-29T15:34:16+08:00">2020-03-29</time>
+              <time title="創建時間：2020-03-29 15:34:16 / 修改時間：15:35:48" itemprop="dateCreated datePublished" datetime="2020-03-29T15:34:16+08:00">2020-03-29</time>
             </span>
 
           
@@ -188,7 +288,7 @@
 
       
           <p>趁著還有記憶的時候把這個問題記錄下來一下…</p>
-<p>最近開始有需求要使用Dataflow來開發一些ETL job了, 基於一些技術上的原因(decouple repos between Airflow dag and Dataflow pipeline 等等), 我們採用了dataflow的template engine. </p>
+<p>最近開始有需求要使用Dataflow來開發一些 ETL job , 基於一些技術上的原因(decouple repos between Airflow dag and Dataflow pipeline 等等), 我們採用了dataflow的template engine. </p>
 <p>而把開發好的dataflow放到template之後, 我們才用airflow來trigger template jobs, 這時候的需求會有</p>
 <ol>
 <li>創造某個template的pipeline job</li>
@@ -594,12 +694,12 @@ and these 4 packages also have their requirement packages, a package management 
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">4</span>
+          <span class="site-state-item-count">5</span>
           <span class="site-state-item-name">文章</span>
         </a>
       </div>
       <div class="site-state-item site-state-tags">
-        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-count">5</span>
         <span class="site-state-item-name">標籤</span>
       </div>
   </nav>
