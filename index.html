@@ -351,7 +351,7 @@
               <span class="post-meta-item-text">發表於</span>
               
 
-              <time title="創建時間：2020-03-29 15:46:15 / 修改時間：15:52:23" itemprop="dateCreated datePublished" datetime="2020-03-29T15:46:15+08:00">2020-03-29</time>
+              <time title="創建時間：2020-03-29 15:46:15 / 修改時間：16:21:52" itemprop="dateCreated datePublished" datetime="2020-03-29T15:46:15+08:00">2020-03-29</time>
             </span>
 
           
@@ -410,9 +410,9 @@
 <h2 id="Machine-Learning"><a href="#Machine-Learning" class="headerlink" title="Machine Learning"></a>Machine Learning</h2><p>在這一塊不論資料大小, 都有適合的東西可以用, 也都可以很簡單的integrate into system.</p>
 <ul>
 <li>單機訓練: Scikit Learn / Keras for deep learning</li>
-<li>分散式訓練: Spark / Sparkit Learn / Google Cloud ML<br>Data Warehousing</li>
+<li>分散式訓練: Spark / Sparkit Learn / Google Cloud ML</li>
 </ul>
-<p>這個部分, 當初的討論是覺得還不需要自己建構龐大的生態系(從儲存架構(HDFS)開始架之類的), 所以有survey一些service, 像是Google BigQuery / AWS Redshift / Snowflake. 後來我們採用的是BigQuery, 主要原因是community看起來不小, 然後是以量計費, 對於採用漸進式思維開發的我們來說其實是很適合的.<br>然後有趣的事情是, pandas也有支援從BigQuery讀取成dataframe的功能, 所以在一些基礎開發上也可以很簡單的整合..</p>
+<h2 id="Data-Warehousing"><a href="#Data-Warehousing" class="headerlink" title="Data Warehousing"></a>Data Warehousing</h2><p>這個部分, 當初的討論是覺得還不需要自己建構龐大的生態系(從儲存架構(HDFS)開始架之類的), 所以有survey一些service, 像是Google BigQuery / AWS Redshift / Snowflake. 後來我們採用的是BigQuery, 主要原因是community看起來不小, 然後是以量計費, 對於採用漸進式思維開發的我們來說其實是很適合的.<br>然後有趣的事情是, pandas也有支援從BigQuery讀取成dataframe的功能, 所以在一些基礎開發上也可以很簡單的整合..</p>
 <h2 id="Data-Analysis"><a href="#Data-Analysis" class="headerlink" title="Data Analysis"></a>Data Analysis</h2><p>For non Engineer members<br>通常是做一些簡單的資料拉取跟視覺化, 發現進來的時候其實這塊做的已經很不錯!<br>所以我在這邊做的事情除了把資料灌到data warehouse去serve一些比較算不完的query之外就是幫助他們做一些比較困難直接用SQL達成的分析</p>
 <p>以我們一般使用情境上來看</p>
 <ul>
