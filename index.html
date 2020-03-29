@@ -181,6 +181,113 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="http://bruce3557.github.io/2020/03/30/tuning-postgres-performance/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="bruce3557">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="魯斯雜想">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/03/30/tuning-postgres-performance/" class="post-title-link" itemprop="url">Tuning Postgres Performance</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+              
+
+              <time title="創建時間：2020-03-30 00:41:43 / 修改時間：00:45:11" itemprop="dateCreated datePublished" datetime="2020-03-30T00:41:43+08:00">2020-03-30</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>想分享一下怎麼做 database tuning。<br>在實務上，我們會看每個不同的 query 去做特化的調整。<br>這邊會帶最近我在做的 case 來跟大家討論一下做 database 優化的步驟。</p>
+<h1 id="Query-優化之路"><a href="#Query-優化之路" class="headerlink" title="Query 優化之路"></a>Query 優化之路</h1><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span></span><br><span class="line">    primary_key,</span><br><span class="line">    aggr_row,</span><br><span class="line">    <span class="keyword">count</span> <span class="keyword">AS</span> <span class="keyword">row_count</span></span><br><span class="line"><span class="keyword">FROM</span></span><br><span class="line">    <span class="keyword">data</span></span><br><span class="line"><span class="keyword">INNER</span> <span class="keyword">JOIN</span> ( <span class="keyword">VALUES</span> (<span class="number">12345</span>), (<span class="number">234556</span>), (<span class="number">655222</span>) ) vals(v)</span><br><span class="line"><span class="keyword">ON</span> primary_key = v</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="Steps"><a href="#Steps" class="headerlink" title="Steps"></a>Steps</h2><ol>
+<li>用 explain / explain analyze 看 Query Plan，可以知道大概 database cost 花在哪些地方</li>
+</ol>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">+------------------------------------------------------------------------------------------------------------------------------------------------------------+</span><br><span class="line">| QUERYPLAN                                                                                                                                                 |</span><br><span class="line">------------------------------------------------------------------------------------------------------------------------------------------------------------|</span><br><span class="line">| Nested Loop  (cost=0.44..75.67 rows=958 width=23)(actual time=9.846..17.156 rows=117loops=1)                                                              |</span><br><span class="line">|   -&gt;  Values Scan on <span class="string">"*VALUES*"</span>  (cost=0.00..0.04rows=3 width=32) (actual time=0.002..0.008 rows=3loops=1)                                                |</span><br><span class="line">|   -&gt;  Index Scan using idx_primary_key_data on data (cost=0.44..22.02 rows=319 width=23) (actual time=5.698.5.707 rows=39 loops=3) |</span><br><span class="line">|         Index Cond: ((primary_key)::text = <span class="string">"*VALUES*"</span>column1)                                                                                              |</span><br><span class="line">| Planning time: 8.106ms                                                                                                                                    |</span><br><span class="line">| Execution time: 17.191ms                                                                                                                                  |</span><br><span class="line">+------------------------------------------------------------------------------------------------------------------------------------------------------------+</span><br><span class="line">EXPLAIN</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>直觀的想法 → 放 index</li>
+</ol>
+<ul>
+<li>index 的目的是告訴你說哪個 key 的哪些資料在哪個 block</li>
+<li>想像成翻書</li>
+<li>有很多種方法，不同 case 有不同的<ul>
+<li>以我們 case，其實最適合可能是 hash index（因為都是執行 equal query）。但他在 PostgreSQL 9.6 上面無法把這個 index 同步到 replica，因此我們最後還是放棄用 btree。</li>
+</ul>
+</li>
+</ul>
+<ol start="3">
+<li>比較進階的想法 → 增加 data locality 使得拿一樣人數的時候可以 access 比較少的 disk block</li>
+</ol>
+<ul>
+<li>這需要了解一點 database 的結構<ul>
+<li>實際上 database 在存資料的時候都是放在 disk 上面，分成一個個 block 讀進 memory，中間搭配一些 cache 的機制。</li>
+<li>Disk access 是很貴的</li>
+<li>當 query 一張 table 的時候，如果沒有 index 他就會把這張 table 所有資料都拿出來跑，意思就是這張 table 如果存在 2000 個 block, 就會有 disk access 2000 次</li>
+<li>加 index 的時候就是幫助你知道你一筆資料會放在哪些 block，幫助你不需要做 full table scan 就可以找到你想要的資料</li>
+<li>如果你能夠讓你的資料都放在一起，那 access block 的次數就可以變少</li>
+</ul>
+</li>
+<li>怎麼讓資料都放在一起?<ul>
+<li>根據我們的 query，可以在 ETL 的時候先把資料照 member_id 集中在一起再灌進去 DB</li>
+<li>搭配 index performance ++</li>
+<li>先灌進去之後再做 cluster index 也有可能可以得到類似的結果</li>
+</ul>
+</li>
+</ul>
+<h1 id="觀測-database-狀態"><a href="#觀測-database-狀態" class="headerlink" title="觀測 - database 狀態"></a>觀測 - database 狀態</h1><ul>
+<li><a href="https://console.cloud.google.com/sql/instances/ml-dimension-replica1/overview?project=dcard-data&amp;authuser=0&amp;organizationId=369104395863&amp;duration=P4D" target="_blank" rel="noopener">https://console.cloud.google.com/sql/instances/ml-dimension-replica1/overview?project=dcard-data&amp;authuser=0&amp;organizationId=369104395863&amp;duration=P4D</a></li>
+</ul>
+<ul>
+<li>CPU load 很高的時候可以執行下列的 query 去看看哪些 query 花很久時間～<br>  SELECT<pre><code>pid,
+datname,
+usename,
+query,
+now() - query_start AS running_time</code></pre>  FROM pg_stat_activity<br>  ORDER BY 5 DESC;</li>
+</ul>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
     <link itemprop="mainEntityOfPage" href="http://bruce3557.github.io/2020/03/30/clean-code-%E7%AD%86%E8%A8%98/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1140,81 +1247,6 @@
   
   
 
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
-    <link itemprop="mainEntityOfPage" href="http://bruce3557.github.io/2020/03/29/load-sklearn-models-from-gcs/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="bruce3557">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="魯斯雜想">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/03/29/load-sklearn-models-from-gcs/" class="post-title-link" itemprop="url">Load Scikit-Learn Models from GCS</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">發表於</span>
-              
-
-              <time title="創建時間：2020-03-29 15:19:09 / 修改時間：15:33:08" itemprop="dateCreated datePublished" datetime="2020-03-29T15:19:09+08:00">2020-03-29</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>最近在做新的machine learning model deploy方法的時候遇到一個問題<br>順手紀錄一下</p>
-<p>在我們的case裡面, model開發完之後必須要deploy到web service<br>deploy的時候第一個問題通常是要怎麼把訓練好的模型load進去service裡,<br>讓他能夠serve request</p>
-<p>目前我們用的machine learning package是scikit-learn,<br>他的model可以使用joblib或是pickle輸出成一個檔案(詳細可以參考這個<a href="http://scikit-learn.org/stable/modules/model_persistence.html" target="_blank" rel="noopener">link</a>)</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> sklearn.externals <span class="keyword">import</span> joblib</span><br><span class="line"></span><br><span class="line">model = ...</span><br><span class="line">joblib.dump(model, <span class="string">"path_you_want_to_put.pkl"</span>)</span><br></pre></td></tr></table></figure>
-
-<p>在loading的時候也很簡單</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">model_path = <span class="string">"path_you_want_to_put.pkl"</span>)</span><br><span class="line">joblib.load(model_path)</span><br></pre></td></tr></table></figure>
-
-<p>而我們這次想做的一個嘗試就是把model放到cloud storage上(例如google cloud storage or AWS S3), 然後再web service把model load進來,<br>一切看起來如此美好XDD<br>但是我們的web service其實是放在heroku上面!<br>而heroku官方在上面並不鼓勵把download file到他的app directory裡<br>於是就開始研究了要怎麼在heroku上面直接load remote file下來的過程</p>
-<p>最後發現兩件事情可以解決這個問題</p>
-<ul>
-<li><code>joblib.load</code>可以讀file object</li>
-<li>python io package有實作read/write (詳情可以參考<a href="https://docs.python.org/3/library/io.html" target="_blank" rel="noopener">官方文件</a>)<br>綜合以上兩件事情就可以把model load進memory裡面了</li>
-</ul>
-<p>簡單附上snippets供大家參考</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">load_model_from_gcs</span><span class="params">(self, gcs_model_path, gcs_bucket)</span>:</span></span><br><span class="line">  storage_client = storage.Client()</span><br><span class="line">  bucket = storage_client.get_bucket(gcs_bucket)</span><br><span class="line">  blob = bucket.blob(gcs_path)</span><br><span class="line">  f = io.BytesIO()</span><br><span class="line">  blob.download_to_file(f)</span><br><span class="line">  <span class="keyword">return</span> joblib.load(f)</span><br></pre></td></tr></table></figure>
-
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
   </div>
 
   
@@ -1285,12 +1317,12 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">11</span>
+          <span class="site-state-item-count">12</span>
           <span class="site-state-item-name">文章</span>
         </a>
       </div>
       <div class="site-state-item site-state-tags">
-        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-count">11</span>
         <span class="site-state-item-name">標籤</span>
       </div>
   </nav>

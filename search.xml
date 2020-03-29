@@ -1,6 +1,63 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>Tuning Postgres Performance</title>
+    <url>/2020/03/30/tuning-postgres-performance/</url>
+    <content><![CDATA[<p>想分享一下怎麼做 database tuning。<br>在實務上，我們會看每個不同的 query 去做特化的調整。<br>這邊會帶最近我在做的 case 來跟大家討論一下做 database 優化的步驟。</p>
+<h1 id="Query-優化之路"><a href="#Query-優化之路" class="headerlink" title="Query 優化之路"></a>Query 優化之路</h1><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span></span><br><span class="line">    primary_key,</span><br><span class="line">    aggr_row,</span><br><span class="line">    <span class="keyword">count</span> <span class="keyword">AS</span> <span class="keyword">row_count</span></span><br><span class="line"><span class="keyword">FROM</span></span><br><span class="line">    <span class="keyword">data</span></span><br><span class="line"><span class="keyword">INNER</span> <span class="keyword">JOIN</span> ( <span class="keyword">VALUES</span> (<span class="number">12345</span>), (<span class="number">234556</span>), (<span class="number">655222</span>) ) vals(v)</span><br><span class="line"><span class="keyword">ON</span> primary_key = v</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="Steps"><a href="#Steps" class="headerlink" title="Steps"></a>Steps</h2><ol>
+<li>用 explain / explain analyze 看 Query Plan，可以知道大概 database cost 花在哪些地方</li>
+</ol>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">+------------------------------------------------------------------------------------------------------------------------------------------------------------+</span><br><span class="line">| QUERYPLAN                                                                                                                                                 |</span><br><span class="line">------------------------------------------------------------------------------------------------------------------------------------------------------------|</span><br><span class="line">| Nested Loop  (cost=0.44..75.67 rows=958 width=23)(actual time=9.846..17.156 rows=117loops=1)                                                              |</span><br><span class="line">|   -&gt;  Values Scan on <span class="string">"*VALUES*"</span>  (cost=0.00..0.04rows=3 width=32) (actual time=0.002..0.008 rows=3loops=1)                                                |</span><br><span class="line">|   -&gt;  Index Scan using idx_primary_key_data on data (cost=0.44..22.02 rows=319 width=23) (actual time=5.698.5.707 rows=39 loops=3) |</span><br><span class="line">|         Index Cond: ((primary_key)::text = <span class="string">"*VALUES*"</span>column1)                                                                                              |</span><br><span class="line">| Planning time: 8.106ms                                                                                                                                    |</span><br><span class="line">| Execution time: 17.191ms                                                                                                                                  |</span><br><span class="line">+------------------------------------------------------------------------------------------------------------------------------------------------------------+</span><br><span class="line">EXPLAIN</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>直觀的想法 → 放 index</li>
+</ol>
+<ul>
+<li>index 的目的是告訴你說哪個 key 的哪些資料在哪個 block</li>
+<li>想像成翻書</li>
+<li>有很多種方法，不同 case 有不同的<ul>
+<li>以我們 case，其實最適合可能是 hash index（因為都是執行 equal query）。但他在 PostgreSQL 9.6 上面無法把這個 index 同步到 replica，因此我們最後還是放棄用 btree。</li>
+</ul>
+</li>
+</ul>
+<ol start="3">
+<li>比較進階的想法 → 增加 data locality 使得拿一樣人數的時候可以 access 比較少的 disk block</li>
+</ol>
+<ul>
+<li>這需要了解一點 database 的結構<ul>
+<li>實際上 database 在存資料的時候都是放在 disk 上面，分成一個個 block 讀進 memory，中間搭配一些 cache 的機制。</li>
+<li>Disk access 是很貴的</li>
+<li>當 query 一張 table 的時候，如果沒有 index 他就會把這張 table 所有資料都拿出來跑，意思就是這張 table 如果存在 2000 個 block, 就會有 disk access 2000 次</li>
+<li>加 index 的時候就是幫助你知道你一筆資料會放在哪些 block，幫助你不需要做 full table scan 就可以找到你想要的資料</li>
+<li>如果你能夠讓你的資料都放在一起，那 access block 的次數就可以變少</li>
+</ul>
+</li>
+<li>怎麼讓資料都放在一起?<ul>
+<li>根據我們的 query，可以在 ETL 的時候先把資料照 member_id 集中在一起再灌進去 DB</li>
+<li>搭配 index performance ++</li>
+<li>先灌進去之後再做 cluster index 也有可能可以得到類似的結果</li>
+</ul>
+</li>
+</ul>
+<h1 id="觀測-database-狀態"><a href="#觀測-database-狀態" class="headerlink" title="觀測 - database 狀態"></a>觀測 - database 狀態</h1><ul>
+<li><a href="https://console.cloud.google.com/sql/instances/ml-dimension-replica1/overview?project=dcard-data&amp;authuser=0&amp;organizationId=369104395863&amp;duration=P4D" target="_blank" rel="noopener">https://console.cloud.google.com/sql/instances/ml-dimension-replica1/overview?project=dcard-data&amp;authuser=0&amp;organizationId=369104395863&amp;duration=P4D</a></li>
+</ul>
+<ul>
+<li>CPU load 很高的時候可以執行下列的 query 去看看哪些 query 花很久時間～<br>  SELECT<pre><code>pid,
+datname,
+usename,
+query,
+now() - query_start AS running_time</code></pre>  FROM pg_stat_activity<br>  ORDER BY 5 DESC;</li>
+</ul>
+]]></content>
+      <tags>
+        <tag>postgresql, database</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Clean Code 讀書筆記 + 雜談</title>
     <url>/2020/03/30/clean-code-%E7%AD%86%E8%A8%98/</url>
     <content><![CDATA[<p>因為 medium 實在太難用了, 所以我決定回 paper 來發文</p>
