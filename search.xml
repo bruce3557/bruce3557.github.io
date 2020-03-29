@@ -51,7 +51,8 @@
 <figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span></span><br><span class="line">    pid,</span><br><span class="line">    datname,</span><br><span class="line">    usename,</span><br><span class="line">    <span class="keyword">query</span>,</span><br><span class="line">    <span class="keyword">now</span>() - query_start <span class="keyword">AS</span> running_time</span><br><span class="line"><span class="keyword">FROM</span> pg_stat_activity</span><br><span class="line"><span class="keyword">ORDER</span> <span class="keyword">BY</span> <span class="number">5</span> <span class="keyword">DESC</span>;</span><br></pre></td></tr></table></figure>
 ]]></content>
       <tags>
-        <tag>postgresql, database</tag>
+        <tag>postgresql</tag>
+        <tag>database</tag>
       </tags>
   </entry>
   <entry>
@@ -328,7 +329,8 @@
 <p>寫這篇的目的其實比較傾向於嘗試提出一些思考點而不是絕對值或是教學說什麼東西怎麼用(主要是感覺這類的記事文章比較少所以想嘗試紀錄看看 XD). 如果有覺得不夠好的地方再請閱讀的大大們不吝指教一下~</p>
 ]]></content>
       <tags>
-        <tag>data, machine-learning</tag>
+        <tag>machine-learning</tag>
+        <tag>data</tag>
       </tags>
   </entry>
   <entry>
