@@ -473,7 +473,7 @@
               <span class="post-meta-item-text">發表於</span>
               
 
-              <time title="創建時間：2020-03-29 15:43:46 / 修改時間：16:22:55" itemprop="dateCreated datePublished" datetime="2020-03-29T15:43:46+08:00">2020-03-29</time>
+              <time title="創建時間：2020-03-29 15:43:46 / 修改時間：23:48:07" itemprop="dateCreated datePublished" datetime="2020-03-29T15:43:46+08:00">2020-03-29</time>
             </span>
 
           
@@ -521,6 +521,7 @@
 <li>Put the file <code>bin/pre_compile</code> with link generation code like:</li>
 </ol>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># !/bin/bash</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> <span class="string">"Generate myrepo to requirements.txt"</span></span><br><span class="line">MY_REPO_GIT=<span class="string">"git+https://<span class="variable">$&#123;GITHUB_USER&#125;</span>:<span class="variable">$&#123;GITHUB_PASSWORD&#125;</span>@github.com/my_account/myrepo.git"</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> MY_REPO_GIT &gt;&gt; requirements.txt</span><br></pre></td></tr></table></figure>
+
 <p>and it will generate private repos link with user information to <code>requirements.txt</code> before executing <code>bin/compile</code>. Finally it can install all things your want with this solution.</p>
 <h2 id="Failed-Try"><a href="#Failed-Try" class="headerlink" title="Failed Try"></a>Failed Try</h2><p>We’ve tried to use <code>setup.py</code> to do customization in installation but it didn’t work because heroku team thinks <code>setup.py</code> can do everything and it’s unsafe if exposing all build environment settings on it.</p>
 <h2 id="Thoughts"><a href="#Thoughts" class="headerlink" title="Thoughts"></a>Thoughts</h2><p>It’s a pretty interesting journey when knowing how the buildpack works and figuring out the code for me haha. But <code>pre_compile</code> seems a deprecated feature in heroku. Not sure when it will be removed.</p>
