@@ -148,6 +148,90 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="http://bruce3557.github.io/2020/03/29/access-dataflow-template-pipeline-with-gcp-rest-api/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="bruce3557">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="魯斯雜想">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/03/29/access-dataflow-template-pipeline-with-gcp-rest-api/" class="post-title-link" itemprop="url">Access Dataflow Template Pipeline with GCP Rest API</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+              
+
+              <time title="創建時間：2020-03-29 15:34:16 / 修改時間：15:35:02" itemprop="dateCreated datePublished" datetime="2020-03-29T15:34:16+08:00">2020-03-29</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>趁著還有記憶的時候把這個問題記錄下來一下…</p>
+<p>最近開始有需求要使用Dataflow來開發一些ETL job了, 基於一些技術上的原因(decouple repos between Airflow dag and Dataflow pipeline 等等), 我們採用了dataflow的template engine. </p>
+<p>而把開發好的dataflow放到template之後, 我們才用airflow來trigger template jobs, 這時候的需求會有</p>
+<ol>
+<li>創造某個template的pipeline job</li>
+<li>監視某個pipeline job的狀態, 如果有錯的話要能夠通知我們</li>
+</ol>
+<p>第一項的話google有<code>gcloud</code>的指令可以快速幫你建立job(可參考<a href="https://cloud.google.com/dataflow/docs/templates/executing-templates" target="_blank" rel="noopener">https://cloud.google.com/dataflow/docs/templates/executing-templates</a>).<br>而第二項的話, 要建立notification其實可以用stackdriver. 但是我們的case還非常簡單, 所以想了一想決定先不需要跳下去使用stackdriver, 而是簡單的去listen job的狀態即可.<br>為了達到上述的目的, 又保持整個stack在一個比較單純的狀況下, 我們決定使用Dataflow的<a href="https://cloud.google.com/dataflow/docs/reference/rest/" target="_blank" rel="noopener">Rest API</a> 做到這些事情.</p>
+<p>而要使用GCP的Rest API時, 其實首要會遇到的就是authentication的問題, 而這部分看文件的時候覺得有點複雜, 後來索性去看他的source code裡面有提供什麼東西XDD. 猛烈研究一陣子之後發現了他有提供一些很好去把你的http client帶上Google oauth token的方法, 主要的關鍵有這兩個</p>
+<ul>
+<li><code>service_account.Credentials</code></li>
+<li><code>google.auth.transport.urlib3.AuthorizedHttp</code></li>
+</ul>
+<p>首先可以用你local的file去拿credential, 然後<code>AuthorizedHttp</code>的class在initial的時候帶入那個credential, 就可以拿到支援GCP request的http client. 大致上的code如下</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_gcp_oauth_credential</span><span class="params">(scopes=None, cred_json)</span>:</span></span><br><span class="line">    <span class="string">"""</span></span><br><span class="line"><span class="string">    Get GCP oauth credential from os environment variable</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line">    cred = service_account.Credentials.from_service_account_info(</span><br><span class="line">        cred_json,</span><br><span class="line">        scopes=scopes</span><br><span class="line">    )</span><br><span class="line">    <span class="keyword">return</span> cred</span><br><span class="line">      </span><br><span class="line">http_client = urllib3.AuthorizedHttp(oauth_obj)</span><br></pre></td></tr></table></figure>
+
+<p>完成認證之後拿到的那個http client, 剩下的用法就跟urllib差不多, 照著spec打API就可以了.<br>為了做到create template pipeline跟monitor job status, 這次主要用到的API有兩個:</p>
+<ul>
+<li>template job <code>create</code> API<a href="https://cloud.google.com/dataflow/docs/reference/rest/v1b3/projects.templates/create" target="_blank" rel="noopener">https://cloud.google.com/dataflow/docs/reference/rest/v1b3/projects.templates/create</a>:</li>
+<li>job status <code>get</code> API<a href="https://cloud.google.com/dataflow/docs/reference/rest/v1b3/projects.jobs/get" target="_blank" rel="noopener">https://cloud.google.com/dataflow/docs/reference/rest/v1b3/projects.jobs/get</a></li>
+</ul>
+<p>舉例來說, 如果我們想要去送一個job, 然後去看一下某個job的狀態, 只要從trigger的request裡面抓出<code>job_id</code>, 再送進去job get的API就好, 可以簡單的參考一下下面的程式碼</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">resp = http_client.urlopen(</span><br><span class="line">    <span class="string">"POST"</span>, url, body=json.dumps(request_body)</span><br><span class="line">)</span><br><span class="line">    </span><br><span class="line"><span class="keyword">if</span> resp.status != <span class="number">200</span>:</span><br><span class="line">   <span class="keyword">raise</span> Exception(<span class="string">"request failed"</span>)</span><br><span class="line">    </span><br><span class="line">job_meta = json.loads(resp.data)</span><br><span class="line">job_id = job_meta[<span class="string">"job"</span>][<span class="string">"id"</span>]</span><br><span class="line">    </span><br><span class="line">job_status_resp = http_client.urlopen(</span><br><span class="line">    <span class="string">"GET"</span>,</span><br><span class="line">    <span class="string">"&#123;api_prefix&#125;/projects/&#123;projecT_id&#125;/jobs/&#123;job_id&#125;"</span>.format(</span><br><span class="line">        api_prefix=api_prefix,</span><br><span class="line">        project_id=project_id,</span><br><span class="line">        job_id=job_id</span><br><span class="line">    )</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>基本上只要有了那個<code>AuthorizedHttp</code>, GCP的Rest API都可以打~~ , 真的是很好用XDD</p>
+<p>其實這次已經是不知到底幾次爬google open出來的source code才有感覺他的API應該要怎麼用了, 他的文件的邏輯有時候感覺並不是很清楚QQ 或是散落在這個地方, 不過也因為這樣多瞭解了一些它裡面的實作, 真是好事～</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
     <link itemprop="mainEntityOfPage" href="http://bruce3557.github.io/2020/03/29/access-bigquery-by-string-credential-in-python/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -510,12 +594,12 @@ and these 4 packages also have their requirement packages, a package management 
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">3</span>
+          <span class="site-state-item-count">4</span>
           <span class="site-state-item-name">文章</span>
         </a>
       </div>
       <div class="site-state-item site-state-tags">
-        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-count">4</span>
         <span class="site-state-item-name">標籤</span>
       </div>
   </nav>
