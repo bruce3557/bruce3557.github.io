@@ -1,226 +1,9 @@
-<!DOCTYPE html>
-<html lang="zh-TW">
-<head>
-  <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
-<meta name="theme-color" content="#222">
-<meta name="generator" content="Hexo 4.2.0">
-  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
-  <link rel="mask-icon" href="/images/logo.svg" color="#222">
-
-<link rel="stylesheet" href="/css/main.css">
-
-
-<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
-
-<script id="hexo-configurations">
-    var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"bruce3557.github.io","root":"/","scheme":"Pisces","version":"7.7.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
-  </script>
-
-  <meta property="og:type" content="website">
-<meta property="og:title" content="魯斯雜想">
-<meta property="og:url" content="http://bruce3557.github.io/index.html">
-<meta property="og:site_name" content="魯斯雜想">
-<meta property="og:locale" content="zh_TW">
-<meta property="article:author" content="bruce3557">
-<meta name="twitter:card" content="summary">
-
-<link rel="canonical" href="http://bruce3557.github.io/">
-
-
-<script id="page-configurations">
-  // https://hexo.io/docs/variables.html
-  CONFIG.page = {
-    sidebar: "",
-    isHome : true,
-    isPost : false,
-    lang   : 'zh-TW'
-  };
-</script>
-
-  <title>魯斯雜想</title>
-  
-
-
-
-
-
-
-  <noscript>
-  <style>
-  .use-motion .brand,
-  .use-motion .menu-item,
-  .sidebar-inner,
-  .use-motion .post-block,
-  .use-motion .pagination,
-  .use-motion .comments,
-  .use-motion .post-header,
-  .use-motion .post-body,
-  .use-motion .collection-header { opacity: initial; }
-
-  .use-motion .site-title,
-  .use-motion .site-subtitle {
-    opacity: initial;
-    top: initial;
-  }
-
-  .use-motion .logo-line-before i { left: initial; }
-  .use-motion .logo-line-after i { right: initial; }
-  </style>
-</noscript>
-
-</head>
-
-<body itemscope itemtype="http://schema.org/WebPage">
-  <div class="container use-motion">
-    <div class="headband"></div>
-
-    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
-      <div class="header-inner"><div class="site-brand-container">
-  <div class="site-nav-toggle">
-    <div class="toggle" aria-label="切換導航欄">
-      <span class="toggle-line toggle-line-first"></span>
-      <span class="toggle-line toggle-line-middle"></span>
-      <span class="toggle-line toggle-line-last"></span>
-    </div>
-  </div>
-
-  <div class="site-meta">
-
-    <a href="/" class="brand" rel="start">
-      <span class="logo-line-before"><i></i></span>
-      <h1 class="site-title">魯斯雜想</h1>
-      <span class="logo-line-after"><i></i></span>
-    </a>
-      <p class="site-subtitle" itemprop="description">我也不知道我在幹嘛 XD</p>
-  </div>
-
-  <div class="site-nav-right">
-    <div class="toggle popup-trigger">
-        <i class="fa fa-search fa-fw fa-lg"></i>
-    </div>
-  </div>
-</div>
-
-
-
-
-<nav class="site-nav">
-  <ul id="menu" class="menu">
-        <li class="menu-item menu-item-home">
-
-    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首頁</a>
-
-  </li>
-        <li class="menu-item menu-item-tags">
-
-    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>標籤</a>
-
-  </li>
-        <li class="menu-item menu-item-archives">
-
-    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>歸檔</a>
-
-  </li>
-      <li class="menu-item menu-item-search">
-        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
-        </a>
-      </li>
-  </ul>
-</nav>
-
-
-
-  <div class="search-pop-overlay">
-    <div class="popup search-popup">
-        <div class="search-header">
-  <span class="search-icon">
-    <i class="fa fa-search"></i>
-  </span>
-  <div class="search-input-container">
-    <input autocomplete="off" autocapitalize="off"
-           placeholder="搜尋..." spellcheck="false"
-           type="search" class="search-input">
-  </div>
-  <span class="popup-btn-close">
-    <i class="fa fa-times-circle"></i>
-  </span>
-</div>
-<div id="search-result">
-  <div id="no-result">
-    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
-  </div>
-</div>
-
-    </div>
-  </div>
-
-</div>
-    </header>
-
-    
-  <div class="back-to-top">
-    <i class="fa fa-arrow-up"></i>
-    <span>0%</span>
-  </div>
-
-
-    <main class="main">
-      <div class="main-inner">
-        <div class="content-wrap">
-          
-
-          <div class="content index">
-            
-
-  <div class="posts-expand">
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
-    <link itemprop="mainEntityOfPage" href="http://bruce3557.github.io/2020/03/29/machine-learning-practical-stacking-ensemble-%E5%B0%8F%E6%95%B4%E7%90%86/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="bruce3557">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="魯斯雜想">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/03/29/machine-learning-practical-stacking-ensemble-%E5%B0%8F%E6%95%B4%E7%90%86/" class="post-title-link" itemprop="url">machine-learning-practical-stacking-ensemble-小整理</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">發表於</span>
-              
-
-              <time title="創建時間：2020-03-29 15:55:20 / 修改時間：15:57:56" itemprop="dateCreated datePublished" datetime="2020-03-29T15:55:20+08:00">2020-03-29</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>最近在工作的時候小K了一些stacking ensemsble的技巧, 感覺整理一下整個思路大概是怎麼樣好像是一個不錯的選擇</p>
+<?xml version="1.0" encoding="utf-8"?>
+<search>
+  <entry>
+    <title>machine-learning-practical-stacking-ensemble-小整理</title>
+    <url>/2020/03/29/machine-learning-practical-stacking-ensemble-%E5%B0%8F%E6%95%B4%E7%90%86/</url>
+    <content><![CDATA[<p>最近在工作的時候小K了一些stacking ensemsble的技巧, 感覺整理一下整個思路大概是怎麼樣好像是一個不錯的選擇</p>
 <h1 id="Ensemble-Learning-簡介"><a href="#Ensemble-Learning-簡介" class="headerlink" title="Ensemble Learning 簡介"></a>Ensemble Learning 簡介</h1><p>基本上用一句話來形容就是: “3個臭皮匠勝過一個諸葛亮”. 原因對每個模型來說你可以把它當成是一個人對某件事物的看法, 舉例來說: 一個人看一份履歷決定要不要面試他, 就算是這個人非常厲害好了, 還是有可能會有bias (像是frontend的人可能不一定對backend的好壞有特別的感覺). ensemble learning想解決的就是類似的事情, 透過訓練多個模型(人)從某些方式綜合起來的去下一個最終的結論. 通常這種方式得到的模型會比較穩定而且具有全局觀.<br>而主要在做ensemble learning的方式可以分成下面三種:</p>
 <ul>
 <li>Bagging</li>
@@ -235,65 +18,15 @@
 <li><a href="https://medium.com/@drumrick/stacking-ensembling-%E7%9B%B8%E9%97%9C%E6%96%87%E7%AB%A0%E6%8E%A8%E8%96%A6-bc35df0cb2b2" target="_blank" rel="noopener">https://medium.com/@drumrick/stacking-ensembling-%E7%9B%B8%E9%97%9C%E6%96%87%E7%AB%A0%E6%8E%A8%E8%96%A6-bc35df0cb2b2</a></li>
 <li><a href="https://scikit-learn.org/stable/modules/ensemble.html#id19" target="_blank" rel="noopener">https://scikit-learn.org/stable/modules/ensemble.html#id19</a></li>
 </ul>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
-    <link itemprop="mainEntityOfPage" href="http://bruce3557.github.io/2020/03/29/%E8%B3%87%E6%96%99%E7%A7%91%E5%AD%B8%E6%9E%B6%E6%A7%8B%E9%9B%9C%E8%A8%98-II/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="bruce3557">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="魯斯雜想">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/03/29/%E8%B3%87%E6%96%99%E7%A7%91%E5%AD%B8%E6%9E%B6%E6%A7%8B%E9%9B%9C%E8%A8%98-II/" class="post-title-link" itemprop="url">資料科學架構雜記(II) — 淺談資料處理的重要性</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">發表於</span>
-              
-
-              <time title="創建時間：2020-03-29 15:48:09 / 修改時間：15:50:28" itemprop="dateCreated datePublished" datetime="2020-03-29T15:48:09+08:00">2020-03-29</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>這個主題是在今天坐公車的時候想到的, 所以想說回家趁晚上的時候趕快把它整理整理寫出來XDD 比較主要的目的可能是想要聊聊好好做資料處理對機器學習專案/分析專案的重要性吧</p>
+]]></content>
+      <tags>
+        <tag>machine-learning</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>資料科學架構雜記(II) — 淺談資料處理的重要性</title>
+    <url>/2020/03/29/%E8%B3%87%E6%96%99%E7%A7%91%E5%AD%B8%E6%9E%B6%E6%A7%8B%E9%9B%9C%E8%A8%98-II/</url>
+    <content><![CDATA[<p>這個主題是在今天坐公車的時候想到的, 所以想說回家趁晚上的時候趕快把它整理整理寫出來XDD 比較主要的目的可能是想要聊聊好好做資料處理對機器學習專案/分析專案的重要性吧</p>
 <h1 id="為什麼想要寫這個"><a href="#為什麼想要寫這個" class="headerlink" title="為什麼想要寫這個"></a>為什麼想要寫這個</h1><p>工作到現在也有累積一些經驗, 現實中的生活常常會發現不是像做學術或是想像中的美好XDD. 經手過一些專案或是跟一些其他公司的人, 或是接案的人在聊, 其實常常發現在最基礎的基礎 — 能夠好好做學習或分析的資料其實都沒有辦法很好的得到 (白話一點就是: $@#$@#資料這麼多問題叫我做個雕), 但其實在需要做好這些基礎工程的時間基本上project的時程差不多或是更久. 而且做一個”好的”資料處理大部分不是會對公司或是距離細節比較遙遠的人能夠理解的事情, 在討論schedule或是發表完成報告的時候常常會覺得說服力相對以feature(像是ML專案的結果)弱很多, 所以想嘗試看看能不能寫出好好做資料處理的優點跟投資在這個上面可以得到怎麼樣的結果.</p>
 <h2 id="聊聊Kaggle的資料"><a href="#聊聊Kaggle的資料" class="headerlink" title="聊聊Kaggle的資料"></a>聊聊Kaggle的資料</h2><p>不管在Kaggle或是學術上, 大部分的資料集其實都做過一定的整理, 所以很多工程上的事情相對來說問題不大, 留下來的會需要處理的部份大部分都是在做feature變換當中需要在意的部分, 舉例來說像是要怎麼處理missing values或是說feature之間要不要做standardize / normalization…<br>所以在做kaggle的題目的時候其實我們可以專注或是很快的進入狀況, 但是到了現實世界之後世界可能就不一樣了. 現實生活中其實常常會有各種意想不到關於資料本身的問題XD, 發現的問題通常是類似下面的問題其中之一:<br>“欸幹為什麼有些人的住址郵遞區號是放在額外的欄位的, 有些人是放在 plaintext的欄位裡面?”<br>“怎麼好像我要的資料在某個時間點之後就不見了XDDDD?” (原來是在某時間之後被移到另一個地方去了)<br>“之前好像有一陣子系統壞掉, 那個時期的label不是很正確QQ”<br>“商品種類怎麼用__product_type: xxx的格式存在plaintext裡面@@”<br>…還有各種千奇百怪的問題XD<br>所以其實在分析專案或是ML專案進入研究跟探索的狀態之前, 去解決這些關於資料上的問題都是為了讓這個專案可以好好研究跟探索.</p>
 <h1 id="簡介資料處理的細節"><a href="#簡介資料處理的細節" class="headerlink" title="簡介資料處理的細節"></a>簡介資料處理的細節</h1><p>這個部分比較想要強調的是關於資料處理本身, 在工程面像是架構本身的東西就不再探討的範圍裡面. 所謂好用的資料, 以目前到現在的經驗, 可以得到幾個等級上的好資料</p>
@@ -307,65 +40,15 @@
 <h2 id="寫Code層面"><a href="#寫Code層面" class="headerlink" title="寫Code層面"></a>寫Code層面</h2><p>這個部分我認為不管是scientist寫或是engineering寫都沒關係, 主要重要的事情會是處理的邏輯正不正確跟工程上的quality好不好, 所以不管是誰寫另外一個角色的人都需要去review對方的作品(science review處理邏輯, engineer review工程上的細節). 這樣才能達到一個比較平衡的境界</p>
 <h2 id="制定schema"><a href="#制定schema" class="headerlink" title="制定schema"></a>制定schema</h2><p>另外更重要的事情是關於怎麼訂schema, 在做這類的事情的時候其實非常需要各方面的feedback, 告訴做的人在商業上重視的是什麼樣的數字, 讓他們去規劃怎麼樣使用. 某個程度上其實跟product的開發有異曲同工之妙啊~<br>這邊想提到的一點是這類schema的制定跟backend在開發的時候制定的規則不太一樣, 有興趣的人可以去看看OLTP跟OLAP的schema怎麼設計. 這邊就不再贅述了 =)</p>
 <h1 id="小結"><a href="#小結" class="headerlink" title="小結"></a>小結</h1><p>之前在聽talk的時候常常有人說 “Data的project常常需要花80%的時間去做data wrangling”, 這句話其實並不假. 但是如果在做一些warehousing或是data product的時候能夠先把這類的mindset考慮進去的話, 我想是有機會把80%再縮短一點的XD, 或是其他專案可以reuse這個的結果是可以增加分析或是學習專案做探索的效率很多的.<br>寫完的感想<br>其實要把這類的事情寫清楚還是覺得複雜度很高, 尤其這個主題又好像大家都知道但很少人寫 在寫的時候其實要釐清很多事情XD(像是問題通常是哪一類型, 應該要怎麼寫等等的). 在寫紀錄的路上繼續努力QQ</p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
-    <link itemprop="mainEntityOfPage" href="http://bruce3557.github.io/2020/03/29/%E8%B3%87%E6%96%99%E7%A7%91%E5%AD%B8%E6%9E%B6%E6%A7%8B%E9%9B%9C%E8%A8%98-I/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="bruce3557">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="魯斯雜想">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/03/29/%E8%B3%87%E6%96%99%E7%A7%91%E5%AD%B8%E6%9E%B6%E6%A7%8B%E9%9B%9C%E8%A8%98-I/" class="post-title-link" itemprop="url">資料科學架構雜記(I) — Why Python for Data Architecture</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">發表於</span>
-              
-
-              <time title="創建時間：2020-03-29 15:46:15 / 修改時間：15:52:23" itemprop="dateCreated datePublished" datetime="2020-03-29T15:46:15+08:00">2020-03-29</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>換新工作已經一段時間, 想整理一下一些在這裡建立data archiecture的一些問題. 我目前的工作主要負責的東西大部分是處理跟資料有關的問題, 剛來的時候最基礎的一個問題就是要決定架構的大方向跟”要用什麼語言implement”. 一般來說講到關於資料處理的語言頗多, 例如R, Java, Scala, Python … 等等. 但是我們比較貪心一點, 想要找到一種大部分可以通吃的語言來當作我們的基礎(當然通吃也有一些tradeoff要取捨), 下面列出當時在規劃的時候主要在思考的幾個問題</p>
+]]></content>
+      <tags>
+        <tag>data, machine-learning</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>資料科學架構雜記(I) — Why Python for Data Architecture</title>
+    <url>/2020/03/29/%E8%B3%87%E6%96%99%E7%A7%91%E5%AD%B8%E6%9E%B6%E6%A7%8B%E9%9B%9C%E8%A8%98-I/</url>
+    <content><![CDATA[<p>換新工作已經一段時間, 想整理一下一些在這裡建立data archiecture的一些問題. 我目前的工作主要負責的東西大部分是處理跟資料有關的問題, 剛來的時候最基礎的一個問題就是要決定架構的大方向跟”要用什麼語言implement”. 一般來說講到關於資料處理的語言頗多, 例如R, Java, Scala, Python … 等等. 但是我們比較貪心一點, 想要找到一種大部分可以通吃的語言來當作我們的基礎(當然通吃也有一些tradeoff要取捨), 下面列出當時在規劃的時候主要在思考的幾個問題</p>
 <h2 id="需要架構的服務"><a href="#需要架構的服務" class="headerlink" title="需要架構的服務"></a>需要架構的服務</h2><ul>
 <li>ETL Workflow System</li>
 <li>Data Processing</li>
@@ -428,65 +111,15 @@
 <hr>
 <h1 id="小結"><a href="#小結" class="headerlink" title="小結"></a>小結</h1><p>除了以上的點, 其實在架構整個系統的每個過程中也各自會遇到不同的問題 (for example: CI/CD怎麼做比較好, model開發的時候deploy的問題), 有機會也想再寫一篇來討論討論.</p>
 <p>寫這篇的目的其實比較傾向於嘗試提出一些思考點而不是絕對值或是教學說什麼東西怎麼用(主要是感覺這類的記事文章比較少所以想嘗試紀錄看看XD). 如果有覺得不夠好的地方再請閱讀的大大們不吝指教一下~</p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
-    <link itemprop="mainEntityOfPage" href="http://bruce3557.github.io/2020/03/29/deploy-private-github-python-packages-on-heroku-without-exposing-credentials/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="bruce3557">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="魯斯雜想">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/03/29/deploy-private-github-python-packages-on-heroku-without-exposing-credentials/" class="post-title-link" itemprop="url">Deploy Private Github Python Packages on Heroku without Exposing Credentials</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">發表於</span>
-              
-
-              <time title="創建時間：2020-03-29 15:43:46 / 修改時間：15:44:41" itemprop="dateCreated datePublished" datetime="2020-03-29T15:43:46+08:00">2020-03-29</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>Recently, we met a deployment problem in heroku python environment.</p>
+]]></content>
+      <tags>
+        <tag>data, machine-learning</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Deploy Private Github Python Packages on Heroku without Exposing Credentials</title>
+    <url>/2020/03/29/deploy-private-github-python-packages-on-heroku-without-exposing-credentials/</url>
+    <content><![CDATA[<p>Recently, we met a deployment problem in heroku python environment.</p>
 <p>In heroku python deployment, it will execute <code>pip install requirements.txt</code> and install packages in the file. But when you have a private package, everything goes complicated.</p>
 <h2 id="Goal"><a href="#Goal" class="headerlink" title="Goal"></a>Goal</h2><p>What we want to do is to install our private package which is on the github. Just making one of the following commands success:</p>
 <ul>
@@ -519,7 +152,7 @@
 <li>Setup environment variables <code>GITHUB_USER</code> and <code>GITHUB_PASSWORD</code></li>
 <li>Put the file <code>bin/pre_compile</code> with link generation code like:</li>
 </ol>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># !/bin/bash</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> <span class="string">"Generate myrepo to requirements.txt"</span></span><br><span class="line">MY_REPO_GIT=<span class="string">"git+https://<span class="variable">$&#123;GITHUB_USER&#125;</span>:<span class="variable">$&#123;GITHUB_PASSWORD&#125;</span>@github.com/my_account/myrepo.git"</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> MY_REPO_GIT &gt;&gt; requirements.txt</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># !/bin/bash</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> <span class="string">"Generate myrepo to requirements.txt"</span></span><br><span class="line">MY_REPO_GIT=<span class="string">"git+https://<span class="variable">$&#123;GITHUB_USER&#125;</span>:<span class="variable">$&#123;GITHUB_PASSWORD&#125;</span>@github.com/my_account/myrepo.git"</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> MY_REPO_GIT &gt;&gt; requirements.txt</span><br></pre></td></tr></table></figure>
 <p>and it will generate private repos link with user information to <code>requirements.txt</code> before executing <code>bin/compile</code>. Finally it can install all things your want with this solution.</p>
 <h2 id="Failed-Try"><a href="#Failed-Try" class="headerlink" title="Failed Try"></a>Failed Try</h2><p>We’ve tried to use <code>setup.py</code> to do customization in installation but it didn’t work because heroku team thinks <code>setup.py</code> can do everything and it’s unsafe if exposing all build environment settings on it.</p>
 <h2 id="Thoughts"><a href="#Thoughts" class="headerlink" title="Thoughts"></a>Thoughts</h2><p>It’s a pretty interesting journey when knowing how the buildpack works and figuring out the code for me haha. But <code>pre_compile</code> seems a deprecated feature in heroku. Not sure when it will be removed.</p>
@@ -527,65 +160,15 @@
 <li><a href="https://devcenter.heroku.com/articles/buildpacks" target="_blank" rel="noopener">Heroku Buildpacks</a></li>
 <li><a href="https://github.com/heroku/heroku-buildpack-python/blob/master/bin/compile" target="_blank" rel="noopener">bin/compile</a></li>
 </ul>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
-    <link itemprop="mainEntityOfPage" href="http://bruce3557.github.io/2020/03/29/beautiful-machine-learning-pipeline-with-scikit-learn/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="bruce3557">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="魯斯雜想">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/03/29/beautiful-machine-learning-pipeline-with-scikit-learn/" class="post-title-link" itemprop="url">Beautiful Machine Learning Pipeline with Scikit Learn</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">發表於</span>
-              
-
-              <time title="創建時間：2020-03-29 15:40:32 / 修改時間：15:41:34" itemprop="dateCreated datePublished" datetime="2020-03-29T15:40:32+08:00">2020-03-29</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>Doing feature engineering is the most complex part when applying machine learning to your product. This note aims to give better manners when using scikit-learn to do feature engineering and machine learning based my personal experience.</p>
+]]></content>
+      <tags>
+        <tag>python, github, heroku</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Beautiful Machine Learning Pipeline with Scikit Learn</title>
+    <url>/2020/03/29/beautiful-machine-learning-pipeline-with-scikit-learn/</url>
+    <content><![CDATA[<p>Doing feature engineering is the most complex part when applying machine learning to your product. This note aims to give better manners when using scikit-learn to do feature engineering and machine learning based my personal experience.</p>
 <p>Before introducing my strategies, let’s review common feature engineering problems first:</p>
 <ul>
 <li>handling missing values</li>
@@ -601,10 +184,10 @@
 <li>deep learning API with complicated feature pipeline</li>
 </ul>
 <p>We define some code snippets about input / output data here before we talk about the detail:</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">train_data = pd.read_csv(<span class="string">"input_data.csv"</span>)</span><br><span class="line">train_labels = pd.read_csv(<span class="string">"input_labels.cs v"</span>)</span><br><span class="line">predict_data = pd.read_csv(<span class="string">"predict_data.csv"</span>)</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">train_data = pd.read_csv(<span class="string">"input_data.csv"</span>)</span><br><span class="line">train_labels = pd.read_csv(<span class="string">"input_labels.cs v"</span>)</span><br><span class="line">predict_data = pd.read_csv(<span class="string">"predict_data.csv"</span>)</span><br></pre></td></tr></table></figure>
 
 <h1 id="Idea-1-Naive-Feature-Engineering"><a href="#Idea-1-Naive-Feature-Engineering" class="headerlink" title="Idea 1. Naive Feature Engineering"></a>Idea 1. Naive Feature Engineering</h1><p>Let’s see how to do simple feature engineering if you don’t apply pipeline.</p>
-<h2 id="Code-Example"><a href="#Code-Example" class="headerlink" title="Code Example"></a>Code Example</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">pca_transform = PCA(n_components=<span class="number">10</span>)</span><br><span class="line">pca_transform.fit(train_data.values)</span><br><span class="line">pca_transform_data = pca_transform.transform(train_data.values)</span><br><span class="line"></span><br><span class="line">nmf_transform = NMF()</span><br><span class="line">nmf_transform.fit(train_data.values)</span><br><span class="line">nmf_transform_data = nmf_transform.transform(train_data.values)</span><br><span class="line"></span><br><span class="line">union_data = np.hstack(nmf_transform_data, pca_transform_data)</span><br><span class="line"></span><br><span class="line">model = RandomForestClassifier()</span><br><span class="line">model.fit(union_data, train_labels.values)</span><br><span class="line"></span><br><span class="line">pca_transform_predict_data = pca_transform.transform(predict_data.values)</span><br><span class="line">nmf_transform_predict_data = nmf_transform.transform(predict_data.values)</span><br><span class="line">union_predict_data = np.hstack(</span><br><span class="line">	pca_transform_predict_data, nmf_transform_predict_data)</span><br><span class="line">predictions = model.predict(union_predict_data)</span><br></pre></td></tr></table></figure>
+<h2 id="Code-Example"><a href="#Code-Example" class="headerlink" title="Code Example"></a>Code Example</h2><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">pca_transform = PCA(n_components=<span class="number">10</span>)</span><br><span class="line">pca_transform.fit(train_data.values)</span><br><span class="line">pca_transform_data = pca_transform.transform(train_data.values)</span><br><span class="line"></span><br><span class="line">nmf_transform = NMF()</span><br><span class="line">nmf_transform.fit(train_data.values)</span><br><span class="line">nmf_transform_data = nmf_transform.transform(train_data.values)</span><br><span class="line"></span><br><span class="line">union_data = np.hstack(nmf_transform_data, pca_transform_data)</span><br><span class="line"></span><br><span class="line">model = RandomForestClassifier()</span><br><span class="line">model.fit(union_data, train_labels.values)</span><br><span class="line"></span><br><span class="line">pca_transform_predict_data = pca_transform.transform(predict_data.values)</span><br><span class="line">nmf_transform_predict_data = nmf_transform.transform(predict_data.values)</span><br><span class="line">union_predict_data = np.hstack(</span><br><span class="line">	pca_transform_predict_data, nmf_transform_predict_data)</span><br><span class="line">predictions = model.predict(union_predict_data)</span><br></pre></td></tr></table></figure>
 <p>As you can see, this is pretty intuitive implementation if you want to apply some feature engineering tricks on your data. But you can imagine that the code will grow into a messy monster if you apply many tricks and to different features.</p>
 <h2 id="Pros"><a href="#Pros" class="headerlink" title="Pros"></a>Pros</h2><ul>
 <li>Naive implementation</li>
@@ -614,7 +197,7 @@
 <li>Have many duplicate code to do similar things</li>
 </ul>
 <h1 id="Idea-2-Scikit-Learn-Model-Pipeline"><a href="#Idea-2-Scikit-Learn-Model-Pipeline" class="headerlink" title="Idea 2. Scikit Learn Model Pipeline"></a>Idea 2. Scikit Learn Model Pipeline</h1><p>To make the whole operation more clean, scikit-learn provides <a href="https://scikit-learn.org/stable/modules/generated/sklearn.pipeline.Pipeline.html#sklearn.pipeline.Pipeline" target="_blank" rel="noopener">pipeline API</a> to let user create a machine learning pipeline without caring about detail stuffs. </p>
-<h2 id="Code-Example-1"><a href="#Code-Example-1" class="headerlink" title="Code Example"></a>Code Example</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">model_pipeline = Pipeline(steps=[</span><br><span class="line">	(<span class="string">"dimension_reduction"</span>, PCA(n_components=<span class="number">10</span>)),</span><br><span class="line">	(<span class="string">"classifiers"</span>, RandomForestClassifier())</span><br><span class="line">])</span><br><span class="line"></span><br><span class="line">model_pipeline.fit(train_data.values, train_labels.values)</span><br><span class="line">predictions = model_pipeline.predict(predict_data.values)</span><br></pre></td></tr></table></figure>
+<h2 id="Code-Example-1"><a href="#Code-Example-1" class="headerlink" title="Code Example"></a>Code Example</h2><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">model_pipeline = Pipeline(steps=[</span><br><span class="line">	(<span class="string">"dimension_reduction"</span>, PCA(n_components=<span class="number">10</span>)),</span><br><span class="line">	(<span class="string">"classifiers"</span>, RandomForestClassifier())</span><br><span class="line">])</span><br><span class="line"></span><br><span class="line">model_pipeline.fit(train_data.values, train_labels.values)</span><br><span class="line">predictions = model_pipeline.predict(predict_data.values)</span><br></pre></td></tr></table></figure>
 
 <h2 id="Pros-1"><a href="#Pros-1" class="headerlink" title="Pros"></a>Pros</h2><ul>
 <li>Get rid of handling details between two stages.</li>
@@ -624,7 +207,7 @@
 <li>If you use this implementation, only apply 1 type of transformation to given features. But this is the first step to make your pipeline more elegant.</li>
 </ul>
 <h1 id="Idea-3-Feature-Union-with-Pipeline"><a href="#Idea-3-Feature-Union-with-Pipeline" class="headerlink" title="Idea 3. Feature Union with Pipeline"></a>Idea 3. Feature Union with Pipeline</h1><p>If you want to apply different feature processing features on your dataset. You can try <a href="https://scikit-learn.org/stable/modules/generated/sklearn.pipeline.FeatureUnion.html" target="_blank" rel="noopener">Feature Union API</a>. The API provides simple way to merge arrays from different types transformation. Here is the code snippets if you want to use it:</p>
-<h2 id="Code-Example-2"><a href="#Code-Example-2" class="headerlink" title="Code Example"></a>Code Example</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">model_pipeline = Pipeline(steps=[</span><br><span class="line">	(<span class="string">"feature_union"</span>, FeatureUnion([</span><br><span class="line">		(<span class="string">"pca"</span>, PCA(n_components=<span class="number">1</span>)),</span><br><span class="line">		(<span class="string">"svd"</span>, TruncatedSVD(n_components=<span class="number">2</span>))</span><br><span class="line">	])),</span><br><span class="line">	(<span class="string">"classifiers"</span>, RandomForestClassifier())</span><br><span class="line">])</span><br><span class="line"></span><br><span class="line">model_pipeline.fit(train_data.values, train_labels.values)</span><br><span class="line">predictions = model_pipeline.predict(predict_data.values)</span><br></pre></td></tr></table></figure>
+<h2 id="Code-Example-2"><a href="#Code-Example-2" class="headerlink" title="Code Example"></a>Code Example</h2><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">model_pipeline = Pipeline(steps=[</span><br><span class="line">	(<span class="string">"feature_union"</span>, FeatureUnion([</span><br><span class="line">		(<span class="string">"pca"</span>, PCA(n_components=<span class="number">1</span>)),</span><br><span class="line">		(<span class="string">"svd"</span>, TruncatedSVD(n_components=<span class="number">2</span>))</span><br><span class="line">	])),</span><br><span class="line">	(<span class="string">"classifiers"</span>, RandomForestClassifier())</span><br><span class="line">])</span><br><span class="line"></span><br><span class="line">model_pipeline.fit(train_data.values, train_labels.values)</span><br><span class="line">predictions = model_pipeline.predict(predict_data.values)</span><br></pre></td></tr></table></figure>
 
 <h2 id="Pros-2"><a href="#Pros-2" class="headerlink" title="Pros"></a>Pros</h2><ul>
 <li>Use different feature transformer without seperating your code into several parts and compose them.</li>
@@ -634,7 +217,7 @@
 <li>Cannot direct send pandas dataframe and use dict-like way to access data in your pipeline.</li>
 </ul>
 <h1 id="Idea-4-Idea-3-Column-Transformer"><a href="#Idea-4-Idea-3-Column-Transformer" class="headerlink" title="Idea 4. Idea 3 + Column Transformer"></a>Idea 4. Idea 3 + Column Transformer</h1><p>With <strong>Idea 3</strong>, you can easily implement your pipeline with different transformation. But there are two problems we mentioned above, we try to solve those problems and find a <a href="https://scikit-learn.org/stable/modules/generated/sklearn.compose.ColumnTransformer.html" target="_blank" rel="noopener">Column Transformer API</a> after survey different materials. I pretty like this API because it makes you can simplify your pipeline like configuration and train / predict your data with a simple command.</p>
-<h2 id="Code-Example-3"><a href="#Code-Example-3" class="headerlink" title="Code Example"></a>Code Example</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line">model_pipeline = Pipeline(steps=[</span><br><span class="line">	(<span class="string">"features"</span>, FeatureUnion([</span><br><span class="line">		(</span><br><span class="line">			<span class="string">"numerical_features"</span>,</span><br><span class="line">			ColumnTransformer([</span><br><span class="line">				(</span><br><span class="line">					<span class="string">"numerical"</span>,</span><br><span class="line">					Pipeline(steps=[(</span><br><span class="line">						<span class="string">"impute_stage"</span>,</span><br><span class="line">						SimpleImputer(missing_values=np.nan, strategy=<span class="string">"median"</span>,)</span><br><span class="line">					)]),</span><br><span class="line">					[<span class="string">"feature_1"</span>]</span><br><span class="line">				)</span><br><span class="line">			])</span><br><span class="line">		), (</span><br><span class="line">			<span class="string">"categorical_features"</span>,</span><br><span class="line">			ColumnTransformer([</span><br><span class="line">				(</span><br><span class="line">					<span class="string">"country_encoding"</span>,</span><br><span class="line">					Pipeline(steps=[</span><br><span class="line">						(<span class="string">"ohe"</span>, OneHotEncoder(handle_unknown=<span class="string">"ignore"</span>)),</span><br><span class="line">						(<span class="string">"reduction"</span>, NMF(n_components=<span class="number">8</span>)),</span><br><span class="line">					]),</span><br><span class="line">					[<span class="string">"country"</span>],</span><br><span class="line">				),</span><br><span class="line">			])</span><br><span class="line">		), (</span><br><span class="line">			<span class="string">"text_features"</span>,</span><br><span class="line">			ColumnTransformer([</span><br><span class="line">				(</span><br><span class="line">					<span class="string">"title_vec"</span>,</span><br><span class="line">					Pipeline(steps=[</span><br><span class="line">						(<span class="string">"tfidf"</span>, TfidfVectorizer()),</span><br><span class="line">						(<span class="string">"reduction"</span>, NMF(n_components=<span class="number">50</span>)),</span><br><span class="line">					]),</span><br><span class="line">					<span class="string">"title"</span></span><br><span class="line">				)</span><br><span class="line">			])</span><br><span class="line">		)</span><br><span class="line">	])),</span><br><span class="line">	(<span class="string">"classifiers"</span>, RandomForestClassifier())</span><br><span class="line">])</span><br><span class="line"></span><br><span class="line">model_pipeline.fit(train_data, train_labels.values)</span><br><span class="line">predictions = model_pipeline.predict(predict_data)</span><br></pre></td></tr></table></figure>
+<h2 id="Code-Example-3"><a href="#Code-Example-3" class="headerlink" title="Code Example"></a>Code Example</h2><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">model_pipeline = Pipeline(steps=[</span><br><span class="line">	(<span class="string">"features"</span>, FeatureUnion([</span><br><span class="line">		(</span><br><span class="line">			<span class="string">"numerical_features"</span>,</span><br><span class="line">			ColumnTransformer([</span><br><span class="line">				(</span><br><span class="line">					<span class="string">"numerical"</span>,</span><br><span class="line">					Pipeline(steps=[(</span><br><span class="line">						<span class="string">"impute_stage"</span>,</span><br><span class="line">						SimpleImputer(missing_values=np.nan, strategy=<span class="string">"median"</span>,)</span><br><span class="line">					)]),</span><br><span class="line">					[<span class="string">"feature_1"</span>]</span><br><span class="line">				)</span><br><span class="line">			])</span><br><span class="line">		), (</span><br><span class="line">			<span class="string">"categorical_features"</span>,</span><br><span class="line">			ColumnTransformer([</span><br><span class="line">				(</span><br><span class="line">					<span class="string">"country_encoding"</span>,</span><br><span class="line">					Pipeline(steps=[</span><br><span class="line">						(<span class="string">"ohe"</span>, OneHotEncoder(handle_unknown=<span class="string">"ignore"</span>)),</span><br><span class="line">						(<span class="string">"reduction"</span>, NMF(n_components=<span class="number">8</span>)),</span><br><span class="line">					]),</span><br><span class="line">					[<span class="string">"country"</span>],</span><br><span class="line">				),</span><br><span class="line">			])</span><br><span class="line">		), (</span><br><span class="line">			<span class="string">"text_features"</span>,</span><br><span class="line">			ColumnTransformer([</span><br><span class="line">				(</span><br><span class="line">					<span class="string">"title_vec"</span>,</span><br><span class="line">					Pipeline(steps=[</span><br><span class="line">						(<span class="string">"tfidf"</span>, TfidfVectorizer()),</span><br><span class="line">						(<span class="string">"reduction"</span>, NMF(n_components=<span class="number">50</span>)),</span><br><span class="line">					]),</span><br><span class="line">					<span class="string">"title"</span></span><br><span class="line">				)</span><br><span class="line">			])</span><br><span class="line">		)</span><br><span class="line">	])),</span><br><span class="line">	(<span class="string">"classifiers"</span>, RandomForestClassifier())</span><br><span class="line">])</span><br><span class="line"></span><br><span class="line">model_pipeline.fit(train_data, train_labels.values)</span><br><span class="line">predictions = model_pipeline.predict(predict_data)</span><br></pre></td></tr></table></figure>
 
 <h2 id="Pros-3"><a href="#Pros-3" class="headerlink" title="Pros"></a>Pros</h2><p>All data transformation can be integrated into a model pipeline and easy to maintain. You can separate differet types of data such as numerical data and categorical data and process them in different methods.</p>
 <h2 id="Cons-3"><a href="#Cons-3" class="headerlink" title="Cons"></a>Cons</h2><p>I can’t find any difficulty if we used such kind of implementation on feature engineering.</p>
@@ -649,65 +232,15 @@
 <p>But there is a drawback is that the steps outside neural networks cannot be optimized by neural network. You still need to optimized your feature engineering part by yourself but it can handle data preprocessing part if you want to use neural network in your pipeline. Another point is that I haven’t try to implement the pipeline if my neural network part is multiple input, so I have no idea about how to integrate multi-inputs neural network in a scikit-learn pipeline.</p>
 <hr>
 <h1 id="Conclusion"><a href="#Conclusion" class="headerlink" title="Conclusion"></a>Conclusion</h1><p>This is just simple introduction to give a thought how to do feature engineering in an elegant way. I believe there are still many awesome tricks can help us create machine learning pipelines with simple code. With survey the documentation and API design in scikit-learn, I enjoy their thoughts on machine learning development and think that is pretty worth to follow them.</p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
-    <link itemprop="mainEntityOfPage" href="http://bruce3557.github.io/2020/03/29/graceful-data-ingestion-with-sqlalchemy-and-pands/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="bruce3557">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="魯斯雜想">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/03/29/graceful-data-ingestion-with-sqlalchemy-and-pands/" class="post-title-link" itemprop="url">Graceful Data Ingestion with SQLAlchemy and Pandas</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">發表於</span>
-              
-
-              <time title="創建時間：2020-03-29 15:37:47 / 修改時間：15:38:38" itemprop="dateCreated datePublished" datetime="2020-03-29T15:37:47+08:00">2020-03-29</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>When the data size is not large enough to use distributed computing frameworks (like Apache Spark), processing data in a machine with pandas is an efficient way. But how to insert data with dataframe object in an elegant way is a big challenge. As we know, python has a good database tookit <a href="https://www.sqlalchemy.org/" target="_blank" rel="noopener">SQLAlchemy</a> with good ORM integration and a good data processing library <a href="https://pandas.pydata.org/" target="_blank" rel="noopener">Pandas</a>. Here we explore some different implementations and discuss the pros and cons in this article.</p>
+]]></content>
+      <tags>
+        <tag>machine-learning, scikit-learn, python</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Graceful Data Ingestion with SQLAlchemy and Pandas</title>
+    <url>/2020/03/29/graceful-data-ingestion-with-sqlalchemy-and-pands/</url>
+    <content><![CDATA[<p>When the data size is not large enough to use distributed computing frameworks (like Apache Spark), processing data in a machine with pandas is an efficient way. But how to insert data with dataframe object in an elegant way is a big challenge. As we know, python has a good database tookit <a href="https://www.sqlalchemy.org/" target="_blank" rel="noopener">SQLAlchemy</a> with good ORM integration and a good data processing library <a href="https://pandas.pydata.org/" target="_blank" rel="noopener">Pandas</a>. Here we explore some different implementations and discuss the pros and cons in this article.</p>
 <h2 id="Problem"><a href="#Problem" class="headerlink" title="Problem"></a>Problem</h2><p>With a pandas dataframe with thousands data and complex data type. How to load the data into target database fast and the code should be easy to maintain.</p>
 <p><strong>Note. Here we use PostgreSQL as the target database.</strong></p>
 <hr>
@@ -719,13 +252,13 @@
 </ul>
 <hr>
 <h2 id="Another-Simple-Idea-Inserting-Data-With-CSV-Files"><a href="#Another-Simple-Idea-Inserting-Data-With-CSV-Files" class="headerlink" title="Another Simple Idea - Inserting Data With CSV Files"></a>Another Simple Idea - Inserting Data With CSV Files</h2><p>Another naive idea to solve this problem is to output dataframe as a CSV file and use <code>copy</code> command or the same implementation in python to import data into database.<br>Following is the code example:</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">bulkload_csv_data_to_database</span><span class="params">(engine, tablename, columns, data, sep=<span class="string">","</span>)</span>:</span></span><br><span class="line">    logging.info(<span class="string">"Start ingesting data into postgres ..."</span>)</span><br><span class="line">    logging.info(<span class="string">"Table name: &#123;table&#125;"</span>.format(table=tablename))</span><br><span class="line">    logging.info(<span class="string">"CSV schema: &#123;schema&#125;"</span>.format(schema=columns))</span><br><span class="line">    conn = engine.connect().connection</span><br><span class="line">    cursor = conn.cursor()</span><br><span class="line">    cursor.copy_from(data, tablename, columns=columns, sep=sep, null=<span class="string">'null'</span>)</span><br><span class="line">    conn.commit()</span><br><span class="line">    conn.close()</span><br><span class="line">    logging.info(<span class="string">"Finish ingesting"</span>)</span><br><span class="line"></span><br><span class="line">df.to_csv(csv_path, index=<span class="literal">False</span>, header=<span class="literal">False</span>)</span><br><span class="line">buldload_csv_data_to_database(engine, tablename, columns, data)</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">bulkload_csv_data_to_database</span><span class="params">(engine, tablename, columns, data, sep=<span class="string">","</span>)</span>:</span></span><br><span class="line">    logging.info(<span class="string">"Start ingesting data into postgres ..."</span>)</span><br><span class="line">    logging.info(<span class="string">"Table name: &#123;table&#125;"</span>.format(table=tablename))</span><br><span class="line">    logging.info(<span class="string">"CSV schema: &#123;schema&#125;"</span>.format(schema=columns))</span><br><span class="line">    conn = engine.connect().connection</span><br><span class="line">    cursor = conn.cursor()</span><br><span class="line">    cursor.copy_from(data, tablename, columns=columns, sep=sep, null=<span class="string">'null'</span>)</span><br><span class="line">    conn.commit()</span><br><span class="line">    conn.close()</span><br><span class="line">    logging.info(<span class="string">"Finish ingesting"</span>)</span><br><span class="line"></span><br><span class="line">df.to_csv(csv_path, index=<span class="literal">False</span>, header=<span class="literal">False</span>)</span><br><span class="line">buldload_csv_data_to_database(engine, tablename, columns, data)</span><br></pre></td></tr></table></figure>
 
 <h3 id="Advantages-1"><a href="#Advantages-1" class="headerlink" title="Advantages"></a>Advantages</h3><p>The loading speed is fast!</p>
 <h3 id="Drawbacks-1"><a href="#Drawbacks-1" class="headerlink" title="Drawbacks"></a>Drawbacks</h3><p>Need to maintain and process data to CSV format that the target database library recognizes it. It goes crazy when your schema is pretty complicated (think about the data with json fields and arrays …). You’ll need to consider the format between <code>df.to_csv</code> and <code>cursor.copy_from</code> very carefully.</p>
 <hr>
 <h2 id="Third-Idea-Insert-Data-by-SQLAlchemy-ORM"><a href="#Third-Idea-Insert-Data-by-SQLAlchemy-ORM" class="headerlink" title="Third Idea - Insert Data by SQLAlchemy ORM"></a>Third Idea - Insert Data by SQLAlchemy ORM</h2><p>To get rid of the huge effort to maintain the CSV format, another solution is to use the same method in web: creating a table object with pandas row and add the object to a session one by one. Following is a simple example:</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Session = sessionmaker(bind=conn)</span><br><span class="line">session = Session()</span><br><span class="line"><span class="keyword">for</span> _, row <span class="keyword">in</span> df.iterrows():</span><br><span class="line">	user = User(name=row[<span class="string">"name"</span>])</span><br><span class="line">	session.add(user)</span><br><span class="line">session.commit()</span><br><span class="line">session.close()</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">Session = sessionmaker(bind=conn)</span><br><span class="line">session = Session()</span><br><span class="line"><span class="keyword">for</span> _, row <span class="keyword">in</span> df.iterrows():</span><br><span class="line">	user = User(name=row[<span class="string">"name"</span>])</span><br><span class="line">	session.add(user)</span><br><span class="line">session.commit()</span><br><span class="line">session.close()</span><br></pre></td></tr></table></figure>
 
 <h3 id="Advantages-2"><a href="#Advantages-2" class="headerlink" title="Advantages"></a>Advantages</h3><ul>
 <li>Easy to maintain</li>
@@ -737,7 +270,7 @@
 <hr>
 <h2 id="Fourth-Idea-Insert-Data-with-Pandas-and-SQLAlchemy-ORM"><a href="#Fourth-Idea-Insert-Data-with-Pandas-and-SQLAlchemy-ORM" class="headerlink" title="Fourth Idea - Insert Data with Pandas and SQLAlchemy ORM"></a>Fourth Idea - Insert Data with Pandas and SQLAlchemy ORM</h2><p>With exploration on SQLAlchemy document, we found there are <a href="https://docs.sqlalchemy.org/en/latest/orm/persistence_techniques.html#bulk-operations" target="_blank" rel="noopener">bulk operations</a> in SQLAlchemy ORM component. In this document, we found <code>bulk_insert_mappings</code> can use list of dictionary with mappings. With this, we can easily develop bulk insert and maintainable code with pandas dataframe.</p>
 <p>Here is the code example:</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Session = sessionmaker(bind=dest_db_con)</span><br><span class="line">session = Session()</span><br><span class="line">session.bulk_insert_mappings(MentorInformation, df.to_dict(orient=<span class="string">"records"</span>))</span><br><span class="line">session.close()</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">Session = sessionmaker(bind=dest_db_con)</span><br><span class="line">session = Session()</span><br><span class="line">session.bulk_insert_mappings(MentorInformation, df.to_dict(orient=<span class="string">"records"</span>))</span><br><span class="line">session.close()</span><br></pre></td></tr></table></figure>
 
 <h3 id="Advantages-3"><a href="#Advantages-3" class="headerlink" title="Advantages"></a>Advantages</h3><ul>
 <li>Fast</li>
@@ -749,65 +282,15 @@
 <hr>
 <h2 id="Conclusion-amp-Discussion"><a href="#Conclusion-amp-Discussion" class="headerlink" title="Conclusion &amp; Discussion"></a>Conclusion &amp; Discussion</h2><p>Because pandas can only process data in a machine, how to solve the same problem in distributed environments is worthwhile to think also. There are many frameworks like Apache Spark to solve the extended problem. </p>
 <p>But in single-machine size data, using pandas + SQLAlchemy is a powerful way to solve the data ingestion problem enough!</p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
-    <link itemprop="mainEntityOfPage" href="http://bruce3557.github.io/2020/03/29/access-dataflow-template-pipeline-with-gcp-rest-api/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="bruce3557">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="魯斯雜想">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/03/29/access-dataflow-template-pipeline-with-gcp-rest-api/" class="post-title-link" itemprop="url">Access Dataflow Template Pipeline with GCP Rest API</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">發表於</span>
-              
-
-              <time title="創建時間：2020-03-29 15:34:16 / 修改時間：15:35:48" itemprop="dateCreated datePublished" datetime="2020-03-29T15:34:16+08:00">2020-03-29</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>趁著還有記憶的時候把這個問題記錄下來一下…</p>
+]]></content>
+      <tags>
+        <tag>pandas, sqlalchemy, python</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Access Dataflow Template Pipeline with GCP Rest API</title>
+    <url>/2020/03/29/access-dataflow-template-pipeline-with-gcp-rest-api/</url>
+    <content><![CDATA[<p>趁著還有記憶的時候把這個問題記錄下來一下…</p>
 <p>最近開始有需求要使用Dataflow來開發一些 ETL job , 基於一些技術上的原因(decouple repos between Airflow dag and Dataflow pipeline 等等), 我們採用了dataflow的template engine. </p>
 <p>而把開發好的dataflow放到template之後, 我們才用airflow來trigger template jobs, 這時候的需求會有</p>
 <ol>
@@ -821,7 +304,7 @@
 <li><code>google.auth.transport.urlib3.AuthorizedHttp</code></li>
 </ul>
 <p>首先可以用你local的file去拿credential, 然後<code>AuthorizedHttp</code>的class在initial的時候帶入那個credential, 就可以拿到支援GCP request的http client. 大致上的code如下</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_gcp_oauth_credential</span><span class="params">(scopes=None, cred_json)</span>:</span></span><br><span class="line">    <span class="string">"""</span></span><br><span class="line"><span class="string">    Get GCP oauth credential from os environment variable</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line">    cred = service_account.Credentials.from_service_account_info(</span><br><span class="line">        cred_json,</span><br><span class="line">        scopes=scopes</span><br><span class="line">    )</span><br><span class="line">    <span class="keyword">return</span> cred</span><br><span class="line">      </span><br><span class="line">http_client = urllib3.AuthorizedHttp(oauth_obj)</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_gcp_oauth_credential</span><span class="params">(scopes=None, cred_json)</span>:</span></span><br><span class="line">    <span class="string">"""</span></span><br><span class="line"><span class="string">    Get GCP oauth credential from os environment variable</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line">    cred = service_account.Credentials.from_service_account_info(</span><br><span class="line">        cred_json,</span><br><span class="line">        scopes=scopes</span><br><span class="line">    )</span><br><span class="line">    <span class="keyword">return</span> cred</span><br><span class="line">      </span><br><span class="line">http_client = urllib3.AuthorizedHttp(oauth_obj)</span><br></pre></td></tr></table></figure>
 
 <p>完成認證之後拿到的那個http client, 剩下的用法就跟urllib差不多, 照著spec打API就可以了.<br>為了做到create template pipeline跟monitor job status, 這次主要用到的API有兩個:</p>
 <ul>
@@ -829,69 +312,19 @@
 <li>job status <code>get</code> API<a href="https://cloud.google.com/dataflow/docs/reference/rest/v1b3/projects.jobs/get" target="_blank" rel="noopener">https://cloud.google.com/dataflow/docs/reference/rest/v1b3/projects.jobs/get</a></li>
 </ul>
 <p>舉例來說, 如果我們想要去送一個job, 然後去看一下某個job的狀態, 只要從trigger的request裡面抓出<code>job_id</code>, 再送進去job get的API就好, 可以簡單的參考一下下面的程式碼</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">resp = http_client.urlopen(</span><br><span class="line">    <span class="string">"POST"</span>, url, body=json.dumps(request_body)</span><br><span class="line">)</span><br><span class="line">    </span><br><span class="line"><span class="keyword">if</span> resp.status != <span class="number">200</span>:</span><br><span class="line">   <span class="keyword">raise</span> Exception(<span class="string">"request failed"</span>)</span><br><span class="line">    </span><br><span class="line">job_meta = json.loads(resp.data)</span><br><span class="line">job_id = job_meta[<span class="string">"job"</span>][<span class="string">"id"</span>]</span><br><span class="line">    </span><br><span class="line">job_status_resp = http_client.urlopen(</span><br><span class="line">    <span class="string">"GET"</span>,</span><br><span class="line">    <span class="string">"&#123;api_prefix&#125;/projects/&#123;projecT_id&#125;/jobs/&#123;job_id&#125;"</span>.format(</span><br><span class="line">        api_prefix=api_prefix,</span><br><span class="line">        project_id=project_id,</span><br><span class="line">        job_id=job_id</span><br><span class="line">    )</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">resp = http_client.urlopen(</span><br><span class="line">    <span class="string">"POST"</span>, url, body=json.dumps(request_body)</span><br><span class="line">)</span><br><span class="line">    </span><br><span class="line"><span class="keyword">if</span> resp.status != <span class="number">200</span>:</span><br><span class="line">   <span class="keyword">raise</span> Exception(<span class="string">"request failed"</span>)</span><br><span class="line">    </span><br><span class="line">job_meta = json.loads(resp.data)</span><br><span class="line">job_id = job_meta[<span class="string">"job"</span>][<span class="string">"id"</span>]</span><br><span class="line">    </span><br><span class="line">job_status_resp = http_client.urlopen(</span><br><span class="line">    <span class="string">"GET"</span>,</span><br><span class="line">    <span class="string">"&#123;api_prefix&#125;/projects/&#123;projecT_id&#125;/jobs/&#123;job_id&#125;"</span>.format(</span><br><span class="line">        api_prefix=api_prefix,</span><br><span class="line">        project_id=project_id,</span><br><span class="line">        job_id=job_id</span><br><span class="line">    )</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
 
 <p>基本上只要有了那個<code>AuthorizedHttp</code>, GCP的Rest API都可以打~~ , 真的是很好用XDD</p>
 <p>其實這次已經是不知到底幾次爬google open出來的source code才有感覺他的API應該要怎麼用了, 他的文件的邏輯有時候感覺並不是很清楚QQ 或是散落在這個地方, 不過也因為這樣多瞭解了一些它裡面的實作, 真是好事～</p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
-    <link itemprop="mainEntityOfPage" href="http://bruce3557.github.io/2020/03/29/access-bigquery-by-string-credential-in-python/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="bruce3557">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="魯斯雜想">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/03/29/access-bigquery-by-string-credential-in-python/" class="post-title-link" itemprop="url">Access BigQuery by String Credential in Python</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">發表於</span>
-              
-
-              <time title="創建時間：2020-03-29 15:32:28 / 修改時間：15:33:00" itemprop="dateCreated datePublished" datetime="2020-03-29T15:32:28+08:00">2020-03-29</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="為什麼會有這個需求"><a href="#為什麼會有這個需求" class="headerlink" title="為什麼會有這個需求"></a>為什麼會有這個需求</h2><ul>
+]]></content>
+      <tags>
+        <tag>python, dataflow, gcp</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Access BigQuery by String Credential in Python</title>
+    <url>/2020/03/29/access-bigquery-by-string-credential-in-python/</url>
+    <content><![CDATA[<h2 id="為什麼會有這個需求"><a href="#為什麼會有這個需求" class="headerlink" title="為什麼會有這個需求"></a>為什麼會有這個需求</h2><ul>
 <li>在Saas平台上開發你的程式的時候, 又需要access bigquery API時<ul>
 <li>for example: heroku, aws lambda …</li>
 <li>以Heroku為例, 放在git repository上的話會有security issue (不應該把keytab / credential file放在repository裡面)</li>
@@ -913,71 +346,21 @@
 </ul>
 <h2 id="後記"><a href="#後記" class="headerlink" title="後記"></a>後記</h2><p>直覺上這個方式應該是可以處理大部分在GCP上面content-based python client的認證.<br>同時在尋找解法的時候其實看到很多現有的解法(stackoverflow, quora…),已經因為API的改動之類的已經無法適用了,去看官方文件也不太好找或是寫的不是好懂,所以才去追原始碼. </p>
 <p>意外發現google release的原始碼實在是很好追(只要找到進入點, comment寫得很完整, 程式的架構也很好, 值得好好學習QQ), 下次在GCP上面遇到類似的問題可以嘗試直接追原始碼看看會不會比較快得到方向及真正的做法.</p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
-    <link itemprop="mainEntityOfPage" href="http://bruce3557.github.io/2020/03/29/load-sklearn-models-from-gcs/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="bruce3557">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="魯斯雜想">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/03/29/load-sklearn-models-from-gcs/" class="post-title-link" itemprop="url">Load Scikit-Learn Models from GCS</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">發表於</span>
-              
-
-              <time title="創建時間：2020-03-29 15:19:09 / 修改時間：15:33:08" itemprop="dateCreated datePublished" datetime="2020-03-29T15:19:09+08:00">2020-03-29</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>最近在做新的machine learning model deploy方法的時候遇到一個問題<br>順手紀錄一下</p>
+]]></content>
+      <tags>
+        <tag>python, bigquery</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Load Scikit-Learn Models from GCS</title>
+    <url>/2020/03/29/load-sklearn-models-from-gcs/</url>
+    <content><![CDATA[<p>最近在做新的machine learning model deploy方法的時候遇到一個問題<br>順手紀錄一下</p>
 <p>在我們的case裡面, model開發完之後必須要deploy到web service<br>deploy的時候第一個問題通常是要怎麼把訓練好的模型load進去service裡,<br>讓他能夠serve request</p>
 <p>目前我們用的machine learning package是scikit-learn,<br>他的model可以使用joblib或是pickle輸出成一個檔案(詳細可以參考這個<a href="http://scikit-learn.org/stable/modules/model_persistence.html" target="_blank" rel="noopener">link</a>)</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> sklearn.externals <span class="keyword">import</span> joblib</span><br><span class="line"></span><br><span class="line">model = ...</span><br><span class="line">joblib.dump(model, <span class="string">"path_you_want_to_put.pkl"</span>)</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> sklearn.externals <span class="keyword">import</span> joblib</span><br><span class="line"></span><br><span class="line">model = ...</span><br><span class="line">joblib.dump(model, <span class="string">"path_you_want_to_put.pkl"</span>)</span><br></pre></td></tr></table></figure>
 
 <p>在loading的時候也很簡單</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">model_path = <span class="string">"path_you_want_to_put.pkl"</span>)</span><br><span class="line">joblib.load(model_path)</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">model_path = <span class="string">"path_you_want_to_put.pkl"</span>)</span><br><span class="line">joblib.load(model_path)</span><br></pre></td></tr></table></figure>
 
 <p>而我們這次想做的一個嘗試就是把model放到cloud storage上(例如google cloud storage or AWS S3), 然後再web service把model load進來,<br>一切看起來如此美好XDD<br>但是我們的web service其實是放在heroku上面!<br>而heroku官方在上面並不鼓勵把download file到他的app directory裡<br>於是就開始研究了要怎麼在heroku上面直接load remote file下來的過程</p>
 <p>最後發現兩件事情可以解決這個問題</p>
@@ -986,67 +369,17 @@
 <li>python io package有實作read/write (詳情可以參考<a href="https://docs.python.org/3/library/io.html" target="_blank" rel="noopener">官方文件</a>)<br>綜合以上兩件事情就可以把model load進memory裡面了</li>
 </ul>
 <p>簡單附上snippets供大家參考</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">load_model_from_gcs</span><span class="params">(self, gcs_model_path, gcs_bucket)</span>:</span></span><br><span class="line">  storage_client = storage.Client()</span><br><span class="line">  bucket = storage_client.get_bucket(gcs_bucket)</span><br><span class="line">  blob = bucket.blob(gcs_path)</span><br><span class="line">  f = io.BytesIO()</span><br><span class="line">  blob.download_to_file(f)</span><br><span class="line">  <span class="keyword">return</span> joblib.load(f)</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">load_model_from_gcs</span><span class="params">(self, gcs_model_path, gcs_bucket)</span>:</span></span><br><span class="line">  storage_client = storage.Client()</span><br><span class="line">  bucket = storage_client.get_bucket(gcs_bucket)</span><br><span class="line">  blob = bucket.blob(gcs_path)</span><br><span class="line">  f = io.BytesIO()</span><br><span class="line">  blob.download_to_file(f)</span><br><span class="line">  <span class="keyword">return</span> joblib.load(f)</span><br></pre></td></tr></table></figure>
 
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
-    <link itemprop="mainEntityOfPage" href="http://bruce3557.github.io/2020/03/29/python-development-environment/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="bruce3557">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="魯斯雜想">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/03/29/python-development-environment/" class="post-title-link" itemprop="url">Python Development Environment</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">發表於</span>
-              
-
-              <time title="創建時間：2020-03-29 15:15:43 / 修改時間：15:16:44" itemprop="dateCreated datePublished" datetime="2020-03-29T15:15:43+08:00">2020-03-29</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>This post is my notes on how to develop python projects easily and thoughts on python project environment management. If anything better and newest, please let me know in comments!</p>
+]]></content>
+      <tags>
+        <tag>python, scikit-learn, gcs</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Python Development Environment</title>
+    <url>/2020/03/29/python-development-environment/</url>
+    <content><![CDATA[<p>This post is my notes on how to develop python projects easily and thoughts on python project environment management. If anything better and newest, please let me know in comments!</p>
 <h1 id="Why-we-need-a-better-environment-to-do-development"><a href="#Why-we-need-a-better-environment-to-do-development" class="headerlink" title="Why we need a better environment to do development?"></a>Why we need a better environment to do development?</h1><p>For every project, we need to build up a project environment to manage the packages of a project, building process, and how to test it. With a fantastic environment, developer can get benefit with following advantages:</p>
 <h2 id="Advantage-1-Speed-Up-Development"><a href="#Advantage-1-Speed-Up-Development" class="headerlink" title="Advantage 1. Speed Up Development"></a>Advantage 1. Speed Up Development</h2><ul>
 <li>with a good environment, developers can quickly build/develop/test/deploy code on any machine</li>
@@ -1086,7 +419,7 @@
 </ul>
 <h2 id="Tip-3-Manage-package-dependencies-with-pip"><a href="#Tip-3-Manage-package-dependencies-with-pip" class="headerlink" title="Tip 3. Manage package dependencies with pip"></a>Tip 3. Manage package dependencies with pip</h2><h3 id="Why-2"><a href="#Why-2" class="headerlink" title="Why"></a>Why</h3><p>Every language has similar package management tools to help developers manage their projects easily (like gem for ruby, npm for javascript, maven / sbt for java …). A package management tool can manage the dependencies and solve  of projects, for example:</p>
 <ul>
-<li>flask dependencies<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#39;Werkzeug&gt;&#x3D;0.14&#39;,</span><br><span class="line">&#39;Jinja2&gt;&#x3D;2.10&#39;,</span><br><span class="line">&#39;itsdangerous&gt;&#x3D;0.24&#39;,</span><br><span class="line">&#39;click&gt;&#x3D;5.1&#39;,</span><br></pre></td></tr></table></figure>
+<li>flask dependencies<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#39;Werkzeug&gt;&#x3D;0.14&#39;,</span><br><span class="line">&#39;Jinja2&gt;&#x3D;2.10&#39;,</span><br><span class="line">&#39;itsdangerous&gt;&#x3D;0.24&#39;,</span><br><span class="line">&#39;click&gt;&#x3D;5.1&#39;,</span><br></pre></td></tr></table></figure>
 and these 4 packages also have their requirement packages, a package management tool will to expand the requirement packages recursively and install it one by one. If there is version conflict (like A package needs C package with version &gt;= 3.0 and B package needs C package with version &lt; 3.0), it should have alert to notify users to fix the conflict.</li>
 </ul>
 <h3 id="How-2"><a href="#How-2" class="headerlink" title="How"></a>How</h3><ul>
@@ -1132,247 +465,9 @@ and these 4 packages also have their requirement packages, a package management 
 <li>Start writing code!</li>
 </ol>
 <p>But yes, there are many advanced commands and usages about the packages. Still lots of things to learn … </p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-  </div>
-
-  
-
-
-
-          </div>
-          
-
-<script>
-  window.addEventListener('tabs:register', () => {
-    let { activeClass } = CONFIG.comments;
-    if (CONFIG.comments.storage) {
-      activeClass = localStorage.getItem('comments_active') || activeClass;
-    }
-    if (activeClass) {
-      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
-      if (activeTab) {
-        activeTab.click();
-      }
-    }
-  });
-  if (CONFIG.comments.storage) {
-    window.addEventListener('tabs:click', event => {
-      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
-      let commentClass = event.target.classList[1];
-      localStorage.setItem('comments_active', commentClass);
-    });
-  }
-</script>
-
-        </div>
-          
-  
-  <div class="toggle sidebar-toggle">
-    <span class="toggle-line toggle-line-first"></span>
-    <span class="toggle-line toggle-line-middle"></span>
-    <span class="toggle-line toggle-line-last"></span>
-  </div>
-
-  <aside class="sidebar">
-    <div class="sidebar-inner">
-
-      <ul class="sidebar-nav motion-element">
-        <li class="sidebar-nav-toc">
-          文章目錄
-        </li>
-        <li class="sidebar-nav-overview">
-          本站概要
-        </li>
-      </ul>
-
-      <!--noindex-->
-      <div class="post-toc-wrap sidebar-panel">
-      </div>
-      <!--/noindex-->
-
-      <div class="site-overview-wrap sidebar-panel">
-        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
-  <p class="site-author-name" itemprop="name">bruce3557</p>
-  <div class="site-description" itemprop="description"></div>
-</div>
-<div class="site-state-wrap motion-element">
-  <nav class="site-state">
-      <div class="site-state-item site-state-posts">
-          <a href="/archives/">
-        
-          <span class="site-state-item-count">10</span>
-          <span class="site-state-item-name">文章</span>
-        </a>
-      </div>
-      <div class="site-state-item site-state-tags">
-        <span class="site-state-item-count">9</span>
-        <span class="site-state-item-name">標籤</span>
-      </div>
-  </nav>
-</div>
-
-
-
-      </div>
-
-    </div>
-  </aside>
-  <div id="sidebar-dimmer"></div>
-
-
-      </div>
-    </main>
-
-    <footer class="footer">
-      <div class="footer-inner">
-        
-
-        
-
-<div class="copyright">
-  
-  &copy; 
-  <span itemprop="copyrightYear">2020</span>
-  <span class="with-love">
-    <i class="fa fa-user"></i>
-  </span>
-  <span class="author" itemprop="copyrightHolder">bruce3557</span>
-</div>
-  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 強力驅動
-  </div>
-
-        
-
-
-
-
-
-
-
-
-      </div>
-    </footer>
-  </div>
-
-  
-  <script src="/lib/anime.min.js"></script>
-  <script src="/lib/pjax/pjax.min.js"></script>
-  <script src="/lib/velocity/velocity.min.js"></script>
-  <script src="/lib/velocity/velocity.ui.min.js"></script>
-
-<script src="/js/utils.js"></script>
-
-<script src="/js/motion.js"></script>
-
-
-<script src="/js/schemes/pisces.js"></script>
-
-
-<script src="/js/next-boot.js"></script>
-
-  <script>
-var pjax = new Pjax({
-  selectors: [
-    'head title',
-    '#page-configurations',
-    '.content-wrap',
-    '.post-toc-wrap',
-    '.languages',
-    '#pjax'
-  ],
-  switches: {
-    '.post-toc-wrap': Pjax.switches.innerHTML
-  },
-  analytics: false,
-  cacheBust: false,
-  scrollTo : !CONFIG.bookmark.enable
-});
-
-window.addEventListener('pjax:success', () => {
-  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
-    var code = element.text || element.textContent || element.innerHTML || '';
-    var parent = element.parentNode;
-    parent.removeChild(element);
-    var script = document.createElement('script');
-    if (element.id) {
-      script.id = element.id;
-    }
-    if (element.className) {
-      script.className = element.className;
-    }
-    if (element.type) {
-      script.type = element.type;
-    }
-    if (element.src) {
-      script.src = element.src;
-      // Force synchronous loading of peripheral JS.
-      script.async = false;
-    }
-    if (element.getAttribute('pjax') !== null) {
-      script.setAttribute('pjax', '');
-    }
-    if (code !== '') {
-      script.appendChild(document.createTextNode(code));
-    }
-    parent.appendChild(script);
-  });
-  NexT.boot.refresh();
-  // Define Motion Sequence & Bootstrap Motion.
-  if (CONFIG.motion.enable) {
-    NexT.motion.integrator
-      .init()
-      .add(NexT.motion.middleWares.subMenu)
-      .add(NexT.motion.middleWares.postList)
-      .bootstrap();
-  }
-  NexT.utils.updateSidebarPosition();
-});
-</script>
-
-
-
-
-  
-
-
-
-
-  
-<script src="/js/local-search.js"></script>
-
-
-
-
-
-
-
-
-
-
-
-
-
-    <div id="pjax">
-  
-
-  
-
-  
-
-    </div>
-</body>
-</html>
+]]></content>
+      <tags>
+        <tag>python</tag>
+      </tags>
+  </entry>
+</search>
