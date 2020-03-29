@@ -206,7 +206,7 @@
               <span class="post-meta-item-text">發表於</span>
               
 
-              <time title="創建時間：2020-03-29 15:55:20 / 修改時間：16:20:12" itemprop="dateCreated datePublished" datetime="2020-03-29T15:55:20+08:00">2020-03-29</time>
+              <time title="創建時間：2020-03-29 15:55:20 / 修改時間：22:36:04" itemprop="dateCreated datePublished" datetime="2020-03-29T15:55:20+08:00">2020-03-29</time>
             </span>
 
           
@@ -220,17 +220,18 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <p>最近在工作的時候小K了一些stacking ensemsble的技巧, 感覺整理一下整個思路大概是怎麼樣好像是一個不錯的選擇</p>
-<h1 id="Ensemble-Learning-簡介"><a href="#Ensemble-Learning-簡介" class="headerlink" title="Ensemble Learning 簡介"></a>Ensemble Learning 簡介</h1><p>基本上用一句話來形容就是: “3個臭皮匠勝過一個諸葛亮”. 原因對每個模型來說你可以把它當成是一個人對某件事物的看法, 舉例來說: 一個人看一份履歷決定要不要面試他, 就算是這個人非常厲害好了, 還是有可能會有bias (像是frontend的人可能不一定對backend的好壞有特別的感覺). ensemble learning想解決的就是類似的事情, 透過訓練多個模型(人)從某些方式綜合起來的去下一個最終的結論. 通常這種方式得到的模型會比較穩定而且具有全局觀.<br>而主要在做ensemble learning的方式可以分成下面三種:</p>
+          <p>最近在工作的時候小K了一些 stacking ensemsble 的技巧, 感覺整理一下整個思路大概是怎麼樣好像是一個不錯的選擇</p>
+<h1 id="Ensemble-Learning-簡介"><a href="#Ensemble-Learning-簡介" class="headerlink" title="Ensemble Learning 簡介"></a>Ensemble Learning 簡介</h1><p>基本上用一句話來形容就是: “3個臭皮匠勝過一個諸葛亮”. 原因對每個模型來說你可以把它當成是一個人對某件事物的看法, 舉例來說: 一個人看一份履歷決定要不要面試他, 就算是這個人非常厲害好了, 還是有可能會有 bias (像是 frontend 的人可能不一定對 backend 的好壞有特別的感覺). ensemble learning 想解決的就是類似的事情, 透過訓練多個模型(人)從某些方式綜合起來的去下一個最終的結論. 通常這種方式得到的模型會比較穩定而且具有全局觀.<br>而主要在做 nsemble learning 的方式可以分成下面三種:</p>
 <ul>
 <li>Bagging</li>
 <li>Boosting</li>
-<li>Stacking<br>Bagging 跟 Boosting 在 scikit learn 的 ensemble method(<a href="https://scikit-learn.org/stable/modules/ensemble.html)裡面其實都有還不錯的介紹" target="_blank" rel="noopener">https://scikit-learn.org/stable/modules/ensemble.html)裡面其實都有還不錯的介紹</a>, 所以在這裡比較想要筆記的是 stacking ensemble 這個方法的思維.</li>
+<li>Stacking<br>Bagging 跟 Boosting 在 scikit learn 的 ensemble method (<a href="https://scikit-learn.org/stable/modules/ensemble.html)裡面其實都有還不錯的介紹" target="_blank" rel="noopener">https://scikit-learn.org/stable/modules/ensemble.html)裡面其實都有還不錯的介紹</a>, 所以在這裡比較想要筆記的是 stacking ensemble 這個方法的思維.</li>
 </ul>
-<h1 id="Stacking-Ensemble-是什麼"><a href="#Stacking-Ensemble-是什麼" class="headerlink" title="Stacking Ensemble 是什麼"></a>Stacking Ensemble 是什麼</h1><p>基本上, stacking ensemble的方法就是訓練各種不同的model, 然後會有第二層的人去綜合前面model的觀點得到一個新的結果.<br>在Kaggle大神的演化裡面, 到最後他提出了stacknet, 一個類似NN的stacking ensemble framework在說stacking method可以做到一個很極致的境界, 就是各種stacking的layer最後形成一個network的感覺. 簡單來說就是一層stacking不夠的話, 你可以有第二層 第三層 …. 到第N層</p>
-<h1 id="Ways-to-Do-Stacking-Ensemble"><a href="#Ways-to-Do-Stacking-Ensemble" class="headerlink" title="Ways to Do Stacking Ensemble"></a>Ways to Do Stacking Ensemble</h1><h2 id="Algorithm-Stacking"><a href="#Algorithm-Stacking" class="headerlink" title="Algorithm Stacking"></a>Algorithm Stacking</h2><p>以不同的model訓練後作為feature, 當作第二層model的feature跟原本的feature參雜在一起. 在這樣的思維下就是用不同人的觀點綜合之後可以得到一個比較沒有偏見的答案所得出的結果。<br>Features Stacking<br>切分不同的feature subset訓練後當作feature, 當作之後 model learning 的 feature 做不同的 weak learner，之後再組合起來一起學習。</p>
+<h1 id="Stacking-Ensemble-是什麼"><a href="#Stacking-Ensemble-是什麼" class="headerlink" title="Stacking Ensemble 是什麼"></a>Stacking Ensemble 是什麼</h1><p>基本上, stacking ensemble的方法就是訓練各種不同的 model, 然後會有第二層的人去綜合前面model的觀點得到一個新的結果.<br>在Kaggle大神的演化裡面, 到最後他提出了stacknet, 一個類似 NN 的 stacking ensemble framework 。在說 stacking method 可以做到一個很極致的境界, 就是各種 stacking 的 layer 最後形成一個 network 的感覺. 簡單來說就是一層 stacking 不夠的話, 你可以有第二層 第三層 …. 到第 N 層</p>
+<h1 id="Ways-to-Do-Stacking-Ensemble"><a href="#Ways-to-Do-Stacking-Ensemble" class="headerlink" title="Ways to Do Stacking Ensemble"></a>Ways to Do Stacking Ensemble</h1><h2 id="Algorithm-Stacking"><a href="#Algorithm-Stacking" class="headerlink" title="Algorithm Stacking"></a>Algorithm Stacking</h2><p>以不同的 model 訓練後作為 feature, 當作第二層 model 的 feature 跟原本的 feature 參雜在一起. 在這樣的思維下就是用不同人的觀點綜合之後可以得到一個比較沒有偏見的答案所得出的結果。</p>
+<h2 id="Features-Stacking"><a href="#Features-Stacking" class="headerlink" title="Features Stacking"></a>Features Stacking</h2><p>切分不同的 feature subset 訓練後當作 feature, 當作之後 model learning 的 feature 做不同的 weak learner，之後再組合起來一起學習。</p>
 <h2 id="Dataset-Stacking"><a href="#Dataset-Stacking" class="headerlink" title="Dataset Stacking"></a>Dataset Stacking</h2><p>切分不同的 dataset 訓練後當作不同層的 training set. 這個思維跟 bagging ensemble 不一樣的點是說, bagging 想做到的事情是用同樣的 classifier 去訓練不同子集合的 dataset, 想避免的事情是某個演算法過度 optimize 當前訓練集的結果. 而在 stacking 裡面的做法其實是在第一層的 weak learner 的時候都用同一個 subset ,得到的結果去用在第二層的 model 裡面當作feature predictor, 再用另一個subset來做第二層leaner的訓練集。</p>
-<h1 id="Conclusion"><a href="#Conclusion" class="headerlink" title="Conclusion"></a>Conclusion</h1><p>把上面的三個方式做各種組合轉換之後stacking應該會有不錯的效果, 但是其實在實作上會遇到蠻多關於怎麼好好切dataset的細節的. 如果有比較有力氣再來整理一些實作上的東西.<br>這個大概是最近在唸stacking相關的資料的一些整理, 目前遇到的問題比較多是在tuning的時候覺得很難得到好結果 但確實在模型的訓練上變得簡單了. 還有很多需要鑽研努力的地方呢…</p>
+<h1 id="Conclusion"><a href="#Conclusion" class="headerlink" title="Conclusion"></a>Conclusion</h1><p>把上面的三個方式做各種組合轉換之後 stacking 應該會有不錯的效果, 但是其實在實作上會遇到蠻多關於怎麼好好切 dataset 的細節的. 如果有比較有力氣再來整理一些實作上的東西.<br>這個大概是最近在唸 stacking 相關的資料的一些整理, 目前遇到的問題比較多是在 tuning 的時候覺得很難得到好結果 但確實在模型的訓練上變得簡單了. 還有很多需要鑽研努力的地方呢…</p>
 <h1 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h1><ul>
 <li><a href="https://medium.com/@drumrick/stacking-ensembling-%E7%9B%B8%E9%97%9C%E6%96%87%E7%AB%A0%E6%8E%A8%E8%96%A6-bc35df0cb2b2" target="_blank" rel="noopener">https://medium.com/@drumrick/stacking-ensembling-%E7%9B%B8%E9%97%9C%E6%96%87%E7%AB%A0%E6%8E%A8%E8%96%A6-bc35df0cb2b2</a></li>
 <li><a href="https://scikit-learn.org/stable/modules/ensemble.html#id19" target="_blank" rel="noopener">https://scikit-learn.org/stable/modules/ensemble.html#id19</a></li>
