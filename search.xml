@@ -46,9 +46,9 @@
 <li><a href="https://console.cloud.google.com/sql/instances/ml-dimension-replica1/overview?project=dcard-data&amp;authuser=0&amp;organizationId=369104395863&amp;duration=P4D" target="_blank" rel="noopener">https://console.cloud.google.com/sql/instances/ml-dimension-replica1/overview?project=dcard-data&amp;authuser=0&amp;organizationId=369104395863&amp;duration=P4D</a></li>
 </ul>
 <ul>
-<li>CPU load 很高的時候可以執行下列的 query 去看看哪些 query 花很久時間～<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span></span><br><span class="line">    pid,</span><br><span class="line">    datname,</span><br><span class="line">    usename,</span><br><span class="line">    <span class="keyword">query</span>,</span><br><span class="line">    <span class="keyword">now</span>() - query_start <span class="keyword">AS</span> running_time</span><br><span class="line"><span class="keyword">FROM</span> pg_stat_activity</span><br><span class="line"><span class="keyword">ORDER</span> <span class="keyword">BY</span> <span class="number">5</span> <span class="keyword">DESC</span>;</span><br></pre></td></tr></table></figure>
-</li>
+<li>CPU load 很高的時候可以執行下列的 query 去看看哪些 query 花很久時間～</li>
 </ul>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span></span><br><span class="line">    pid,</span><br><span class="line">    datname,</span><br><span class="line">    usename,</span><br><span class="line">    <span class="keyword">query</span>,</span><br><span class="line">    <span class="keyword">now</span>() - query_start <span class="keyword">AS</span> running_time</span><br><span class="line"><span class="keyword">FROM</span> pg_stat_activity</span><br><span class="line"><span class="keyword">ORDER</span> <span class="keyword">BY</span> <span class="number">5</span> <span class="keyword">DESC</span>;</span><br></pre></td></tr></table></figure>
 ]]></content>
       <tags>
         <tag>postgresql, database</tag>
