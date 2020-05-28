@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>Intro to Parallel Computing</title>
+    <url>/2020/05/28/Intro%20to%20Parallel%20Computing/</url>
+    <content><![CDATA[<h1 id="SSSSSS"><a href="#SSSSSS" class="headerlink" title="SSSSSS"></a>SSSSSS</h1>]]></content>
+  </entry>
+  <entry>
     <title>Tuning Postgres Performance</title>
     <url>/2020/03/30/tuning-postgres-performance/</url>
     <content><![CDATA[<p>想分享一下怎麼做 database tuning。<br>在實務上，我們會看每個不同的 query 去做特化的調整。<br>這邊會帶最近我在做的 case 來跟大家討論一下做 database 優化的步驟。</p>
