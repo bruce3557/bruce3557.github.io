@@ -3,12 +3,38 @@
   <entry>
     <title>閱讀筆記 - 20230623</title>
     <url>/2023/06/23/%E9%96%B1%E8%AE%80%E7%AD%86%E8%A8%98%20-%2020230623/</url>
-    <content><![CDATA[]]></content>
-  </entry>
-  <entry>
-    <title>初入技術管理的旅程-I</title>
-    <url>/2021/09/19/%E5%88%9D%E5%85%A5%E6%8A%80%E8%A1%93%E7%AE%A1%E7%90%86%E7%9A%84%E6%97%85%E7%A8%8B-I/</url>
-    <content><![CDATA[]]></content>
+    <content><![CDATA[<p>最近在公司裡面會定期發佈週記，想說順便記錄一下最近看到覺得有趣的東西留個底以便日後查找 XD<br>看的東西蠻雜的不太知道怎麼做標題（容我再想想…）</p>
+<p>大體上都跟技術相關，主要是想整理自己看過不同的地方的東西 &amp; 覺得比較有趣的擷取起來，有時候會跨到管理的一些思考分享</p>
+<h2 id="AI-相關分享"><a href="#AI-相關分享" class="headerlink" title="AI 相關分享"></a>AI 相關分享</h2><ul>
+<li><a href="https://openai.com/blog/function-calling-and-other-api-updates" target="_blank" rel="noopener">OpenAI 最近做了一連串的模型更新和價格調整</a>，主要包含<ul>
+<li><a href="https://platform.openai.com/docs/guides/gpt/function-calling" target="_blank" rel="noopener">function calling</a> 的功能</li>
+<li>模型更新：GPT4 &amp; GPT 3.5 都有新增功能跟</li>
+<li>價格調整：<ul>
+<li>text-embedding-ada-002 變成每 1K 0.0001 USD</li>
+<li>gpt-3.5-turbo-16k 0.003/k-input-tokens -&gt; 0.004/k-output-tokens</li>
+<li>gpt-3.5-turbo input tokens 費用降低 25%</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="https://ai.facebook.com/blog/voicebox-generative-ai-model-speech/" target="_blank" rel="noopener">Meta’s VoiceBox</a>：覺得有可能是語音界生成的衝擊，可以關注一下</li>
+<li><a href="https://huggingface.co/spaces/facebook/MusicGen" target="_blank" rel="noopener">Meta’s MusicGen</a>：音樂生成，覺得好像可以拿來做 podcast 開場的生成音樂 XDD</li>
+<li><a href="https://blog.google/products/shopping/virtual-try-on-google-generative-ai/" target="_blank" rel="noopener">Google’s TryOnDiffusion</a>：以後試穿衣服不用去現場了 XD?</li>
+<li><a href="https://www.foreplay.co/" target="_blank" rel="noopener">Foreplay 2.0</a>：AI 生成廣告素材，覺得蠻適合有在產素材或社群經營的人用用看看，可能會蠻有幫助</li>
+<li><a href="https://www.locofy.ai/" target="_blank" rel="noopener">Locofy</a>：說是可以直接從 Figma or design system 直接生成 frontend code，感覺不知道是不是真的好用或是有辦法簡單做到，如果是的話應該是革命性的進展。</li>
+<li><a href="https://vercel.com/blog/introducing-the-vercel-ai-sdk" target="_blank" rel="noopener">Vercel AI SDK</a> :幫你包好很多 LLM 的服務的 library，應該可以很懶人做掉很多事情</li>
+<li><a href="https://writesonic.com/ai-article-writer-generator" target="_blank" rel="noopener">WriteSonic</a>：用 AI 寫行銷文章</li>
+<li><a href="https://alexsandu.substack.com/p/market-map-gen-ai-companies-with" target="_blank" rel="noopener">AI 市場地圖</a>：每間公司在 AI 領域上的落點</li>
+<li><a href="https://github.com/bentoml/OpenLLM" target="_blank" rel="noopener">OpenLLM</a>：跟 Vercel AI 蠻像的，但差異是 Vercel AI 更多是 SaaS 的 API，OpenLLM 更多是整合 open source model</li>
+<li><a href="https://arxiv.org/abs/2306.07303" target="_blank" rel="noopener">A Comprehensive Survey on Applications of Transformers for Deep Learning Tasks</a>：整理最近幾年 transformer model 的想法，是一篇 survey paper</li>
+<li><a href="https://www.granica.ai/" target="_blank" rel="noopener">granica</a>：說是可以優化 GCS or AWS S33 的儲存效率的工具，感覺要試用一下才知道</li>
+</ul>
+<p>自己感覺現在應該就是 AI 相關的應用開始百花齊放的時候（有點像手機 APP 一直出來），但對企業來說要選擇怎麼樣的路線來用這些東西就很重要，例如：要自己花時間做呢？還是不同 solution 就用採購分散在不同平台呢？</p>
+]]></content>
+      <tags>
+        <tag>engineering</tag>
+        <tag>notes</tag>
+      </tags>
   </entry>
   <entry>
     <title>Tuning Postgres Performance</title>

@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"bruce3557.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="This post is my notes on how to develop python projects easily and thoughts on python project environment management. If anything better and newest, please let me know in comments! Why we need a bette">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Python Development Environment">
+<meta property="og:url" content="http://bruce3557.github.io/2020/03/29/python-development-environment/index.html">
+<meta property="og:site_name" content="魯斯雜想">
+<meta property="og:description" content="This post is my notes on how to develop python projects easily and thoughts on python project environment management. If anything better and newest, please let me know in comments! Why we need a bette">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2020-03-29T07:15:43.000Z">
+<meta property="article:modified_time" content="2021-09-18T17:50:33.514Z">
+<meta property="article:author" content="bruce3557">
+<meta property="article:tag" content="python">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://bruce3557.github.io/2020/03/29/python-development-environment/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-TW'
+  };
+</script>
+
+  <title>Python Development Environment | 魯斯雜想</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">魯斯雜想</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">我也不知道我在幹嘛 XD</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="http://bruce3557.github.io/2020/03/29/python-development-environment/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="bruce3557">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="魯斯雜想">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Python Development Environment
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+
+              <time title="創建時間：2020-03-29 15:15:43" itemprop="dateCreated datePublished" datetime="2020-03-29T15:15:43+08:00">2020-03-29</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新於</span>
+                <time title="修改時間：2021-09-19 01:50:33" itemprop="dateModified" datetime="2021-09-19T01:50:33+08:00">2021-09-19</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>This post is my notes on how to develop python projects easily and thoughts on python project environment management. If anything better and newest, please let me know in comments!</p>
+<h1 id="Why-we-need-a-better-environment-to-do-development"><a href="#Why-we-need-a-better-environment-to-do-development" class="headerlink" title="Why we need a better environment to do development?"></a>Why we need a better environment to do development?</h1><p>For every project, we need to build up a project environment to manage the packages of a project, building process, and how to test it. With a fantastic environment, developer can get benefit with following advantages:</p>
+<h2 id="Advantage-1-Speed-Up-Development"><a href="#Advantage-1-Speed-Up-Development" class="headerlink" title="Advantage 1. Speed Up Development"></a>Advantage 1. Speed Up Development</h2><ul>
+<li>with a good environment, developers can quickly build/develop/test/deploy code on any machine</li>
+<li>quick deployment is very important on CI/CD<ul>
+<li>easy to release</li>
+<li>agile testing</li>
+</ul>
+</li>
+</ul>
+<h2 id="Advantage-2-Control-dependencies-of-projects"><a href="#Advantage-2-Control-dependencies-of-projects" class="headerlink" title="Advantage 2. Control dependencies of projects"></a>Advantage 2. Control dependencies of projects</h2><ul>
+<li>different projects will not share same packages they don’t use</li>
+<li>avoid dependency conflict between different projects<ul>
+<li>For example, if package A uses a package with latest version and another one uses older version. We can develop and manage the dependency by project independently and avoid hidden conflicts between two versions.</li>
+</ul>
+</li>
+<li>keep projects smallest size </li>
+</ul>
+<p>Though good environment makes developers happy, building a good development environment needs huge effort and challenging. Here we introduce some common practices to build up python development environment. </p>
+<h1 id="How-to-manage-your-python-environment"><a href="#How-to-manage-your-python-environment" class="headerlink" title="How to manage your python environment?"></a>How to manage your python environment?</h1><h2 id="Tip-1-Manage-Python-Version"><a href="#Tip-1-Manage-Python-Version" class="headerlink" title="Tip 1. Manage Python Version"></a>Tip 1. Manage Python Version</h2><h3 id="Why"><a href="#Why" class="headerlink" title="Why"></a>Why</h3><p>Python has different versions (<code>python 2.6</code>, <code>python 2.7</code>, <code>python 3.x</code> … ). For each project, you need to decide which version in your project or you need to develop an old project which build on <code>python 2.6</code>. Quickly changing your environment can help you know which version of python you are using!</p>
+<h3 id="How"><a href="#How" class="headerlink" title="How"></a>How</h3><ul>
+<li><code>pyenv</code>: <a href="https://github.com/pyenv/pyenv" target="_blank" rel="noopener">https://github.com/pyenv/pyenv</a></li>
+<li>Like <code>rbenv</code> in ruby if you are a ruby user XD</li>
+<li>commands:<ul>
+<li><code>pyenv versions</code>: list all python versions in pyenv</li>
+<li><code>pyenv global {python_version}</code>: setup global environment of python.</li>
+<li>Provide support for per-project Python versions.</li>
+</ul>
+</li>
+</ul>
+<h2 id="Tip-2-Separate-environment-of-each-project-with-virtual-environment"><a href="#Tip-2-Separate-environment-of-each-project-with-virtual-environment" class="headerlink" title="Tip 2. Separate environment of each project with virtual environment"></a>Tip 2. Separate environment of each project with virtual environment</h2><h3 id="Why-1"><a href="#Why-1" class="headerlink" title="Why"></a>Why</h3><p>To develop a project, we need to build up the packages structures that this project uses. But if we use builtin python, we cannot separate requirement packages by project. Think about the case: now we use <code>pyenv</code> and choose <code>python 3.6</code>  as project python version and have 2 projects to develop, how to manage the package dependencies independently? To solve this case, <code>virtualenv</code> provides a way to build up a empty python environment of a project and you can check in any environment to do related development easily.</p>
+<h3 id="How-1"><a href="#How-1" class="headerlink" title="How"></a>How</h3><ul>
+<li>project github: <a href="https://github.com/pypa/virtualenv" target="_blank" rel="noopener">https://github.com/pypa/virtualenv</a></li>
+<li>commands:<ul>
+<li><code>virtualenv ENV</code>: start a new python virtual environment in ENV directory</li>
+<li><code>source ENV/bin/activate</code>: start working in <code>ENV</code> python environment</li>
+<li><code>deactivate</code>: checkout current environment</li>
+</ul>
+</li>
+</ul>
+<h2 id="Tip-3-Manage-package-dependencies-with-pip"><a href="#Tip-3-Manage-package-dependencies-with-pip" class="headerlink" title="Tip 3. Manage package dependencies with pip"></a>Tip 3. Manage package dependencies with pip</h2><h3 id="Why-2"><a href="#Why-2" class="headerlink" title="Why"></a>Why</h3><p>Every language has similar package management tools to help developers manage their projects easily (like gem for ruby, npm for javascript, maven / sbt for java …). A package management tool can manage the dependencies and solve  of projects, for example:</p>
+<ul>
+<li>flask dependencies<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#39;Werkzeug&gt;&#x3D;0.14&#39;,</span><br><span class="line">&#39;Jinja2&gt;&#x3D;2.10&#39;,</span><br><span class="line">&#39;itsdangerous&gt;&#x3D;0.24&#39;,</span><br><span class="line">&#39;click&gt;&#x3D;5.1&#39;,</span><br></pre></td></tr></table></figure>
+and these 4 packages also have their requirement packages, a package management tool will to expand the requirement packages recursively and install it one by one. If there is version conflict (like A package needs C package with version &gt;= 3.0 and B package needs C package with version &lt; 3.0), it should have alert to notify users to fix the conflict.</li>
+</ul>
+<h3 id="How-2"><a href="#How-2" class="headerlink" title="How"></a>How</h3><ul>
+<li><a href="https://github.com/pypa/pip" target="_blank" rel="noopener">https://github.com/pypa/pip</a></li>
+<li>commands<ul>
+<li><code>pip install {package_name}</code> : install a package</li>
+<li><code>pip freeze</code>: list all packages and versions in current environment</li>
+<li><code>pip install -r {requirement_path}</code>: install all packages in <code>requirement_path</code></li>
+<li><code>pip uninstall {package_name}</code>: uninstall a package</li>
+</ul>
+</li>
+</ul>
+<h2 id="Tip-4-Latest-tool-to-build-python-development-tool-pipenv"><a href="#Tip-4-Latest-tool-to-build-python-development-tool-pipenv" class="headerlink" title="Tip 4. Latest tool to build python development tool: pipenv"></a>Tip 4. Latest tool to build python development tool: pipenv</h2><h3 id="Why-3"><a href="#Why-3" class="headerlink" title="Why"></a>Why</h3><p>To make experience better, <code>pipenv</code> can let user manage packages and environment more easily. In general, this package is like <code>virtualenv</code> + <code>pip</code>.<br>Also, this package also solves some problems if developers use <code>virtualenv</code> + <code>pip</code>. As official documents mentioned, the problems that <code>pipenv</code> wants to solve is:</p>
+<blockquote>
+<p>The problems that Pipenv seeks to solve are multi-faceted:</p>
+<ul>
+<li>You no longer need to use <code>pip</code> and <code>virtualenv</code> separately. They work together.</li>
+<li>Managing a <code>requirements.txt</code> file can be problematic, so Pipenv uses <code>Pipfile</code> and <code>Pipfile.lock</code> to separate abstract dependency declarations from the last tested combination.</li>
+<li>Hashes are used everywhere, always. Security. Automatically expose security vulnerabilities.</li>
+<li>Strongly encourage the use of the latest versions of dependencies to minimize security risks arising from outdated components.</li>
+<li>Give you insight into your dependency graph (e.g. <code>$ pipenv graph</code>).</li>
+<li>Streamline development workflow by loading <code>.env</code> files.</li>
+</ul>
+</blockquote>
+<h3 id="How-3"><a href="#How-3" class="headerlink" title="How"></a>How</h3><ul>
+<li><a href="https://docs.pipenv.org/" target="_blank" rel="noopener">https://docs.pipenv.org/</a></li>
+<li>commands<ul>
+<li><code>pipenv install</code>: install from Pipfile</li>
+<li><code>pipenv install {package}</code>: install a package</li>
+<li><code>pipenv graph</code>: list project dependency in graph</li>
+<li><code>pipenv shell</code>: enter projects python environment</li>
+</ul>
+</li>
+</ul>
+<h1 id="The-flow-practice-to-start-a-new-python-project"><a href="#The-flow-practice-to-start-a-new-python-project" class="headerlink" title="The flow practice to start a new python project"></a>The flow practice to start a new python project</h1><p>By compositing above tools with simple commands, developers can easily establish python environment for their projects. Following are the simple summary of the steps:</p>
+<ol>
+<li>Choose python version</li>
+<li>Create package environment<ul>
+<li>using <code>virtualenv</code> + <code>pip</code></li>
+<li>using <code>pipenv</code> directly</li>
+</ul>
+</li>
+<li>Start writing code!</li>
+</ol>
+<p>But yes, there are many advanced commands and usages about the packages. Still lots of things to learn … </p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/python/" rel="tag"># python</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item"></div>
+      <div class="post-nav-item">
+    <a href="/2020/03/29/load-sklearn-models-from-gcs/" rel="next" title="Load Scikit-Learn Models from GCS">
+      Load Scikit-Learn Models from GCS <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目錄
+        </li>
+        <li class="sidebar-nav-overview">
+          本站概要
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Why-we-need-a-better-environment-to-do-development"><span class="nav-number">1.</span> <span class="nav-text">Why we need a better environment to do development?</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Advantage-1-Speed-Up-Development"><span class="nav-number">1.1.</span> <span class="nav-text">Advantage 1. Speed Up Development</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Advantage-2-Control-dependencies-of-projects"><span class="nav-number">1.2.</span> <span class="nav-text">Advantage 2. Control dependencies of projects</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#How-to-manage-your-python-environment"><span class="nav-number">2.</span> <span class="nav-text">How to manage your python environment?</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Tip-1-Manage-Python-Version"><span class="nav-number">2.1.</span> <span class="nav-text">Tip 1. Manage Python Version</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Why"><span class="nav-number">2.1.1.</span> <span class="nav-text">Why</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#How"><span class="nav-number">2.1.2.</span> <span class="nav-text">How</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Tip-2-Separate-environment-of-each-project-with-virtual-environment"><span class="nav-number">2.2.</span> <span class="nav-text">Tip 2. Separate environment of each project with virtual environment</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Why-1"><span class="nav-number">2.2.1.</span> <span class="nav-text">Why</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#How-1"><span class="nav-number">2.2.2.</span> <span class="nav-text">How</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Tip-3-Manage-package-dependencies-with-pip"><span class="nav-number">2.3.</span> <span class="nav-text">Tip 3. Manage package dependencies with pip</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Why-2"><span class="nav-number">2.3.1.</span> <span class="nav-text">Why</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#How-2"><span class="nav-number">2.3.2.</span> <span class="nav-text">How</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Tip-4-Latest-tool-to-build-python-development-tool-pipenv"><span class="nav-number">2.4.</span> <span class="nav-text">Tip 4. Latest tool to build python development tool: pipenv</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Why-3"><span class="nav-number">2.4.1.</span> <span class="nav-text">Why</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#How-3"><span class="nav-number">2.4.2.</span> <span class="nav-text">How</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#The-flow-practice-to-start-a-new-python-project"><span class="nav-number">3.</span> <span class="nav-text">The flow practice to start a new python project</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">bruce3557</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">13</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">bruce3557</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 強力驅動
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

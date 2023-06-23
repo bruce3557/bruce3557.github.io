@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"bruce3557.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="Recently, we met a deployment problem in heroku python environment. In heroku python deployment, it will execute pip install requirements.txt and install packages in the file. But when you have a priv">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Deploy Private Github Python Packages on Heroku without Exposing Credentials">
+<meta property="og:url" content="http://bruce3557.github.io/2020/03/29/deploy-private-github-python-packages-on-heroku-without-exposing-credentials/index.html">
+<meta property="og:site_name" content="魯斯雜想">
+<meta property="og:description" content="Recently, we met a deployment problem in heroku python environment. In heroku python deployment, it will execute pip install requirements.txt and install packages in the file. But when you have a priv">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2020-03-29T07:43:46.000Z">
+<meta property="article:modified_time" content="2021-09-18T17:50:33.513Z">
+<meta property="article:author" content="bruce3557">
+<meta property="article:tag" content="python">
+<meta property="article:tag" content="github">
+<meta property="article:tag" content="heroku">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://bruce3557.github.io/2020/03/29/deploy-private-github-python-packages-on-heroku-without-exposing-credentials/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-TW'
+  };
+</script>
+
+  <title>Deploy Private Github Python Packages on Heroku without Exposing Credentials | 魯斯雜想</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">魯斯雜想</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">我也不知道我在幹嘛 XD</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="http://bruce3557.github.io/2020/03/29/deploy-private-github-python-packages-on-heroku-without-exposing-credentials/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="bruce3557">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="魯斯雜想">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Deploy Private Github Python Packages on Heroku without Exposing Credentials
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+
+              <time title="創建時間：2020-03-29 15:43:46" itemprop="dateCreated datePublished" datetime="2020-03-29T15:43:46+08:00">2020-03-29</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新於</span>
+                <time title="修改時間：2021-09-19 01:50:33" itemprop="dateModified" datetime="2021-09-19T01:50:33+08:00">2021-09-19</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>Recently, we met a deployment problem in heroku python environment.</p>
+<p>In heroku python deployment, it will execute <code>pip install requirements.txt</code> and install packages in the file. But when you have a private package, everything goes complicated.</p>
+<h2 id="Goal"><a href="#Goal" class="headerlink" title="Goal"></a>Goal</h2><p>What we want to do is to install our private package which is on the github. Just making one of the following commands success:</p>
+<ul>
+<li><code>pip install git+https://github.com/my_account/myrepo.git</code></li>
+<li><code>pip install git+ssh://github.com/my_account/myrepo.git</code></li>
+<li><code>pip install git+https://{username}:{password}@github.com/my_account/myrepo.git</code></li>
+</ul>
+<p>The complicated thing here is that you don’t want to commit any credential or password in git because it causes to many security issues. So how to let heroku know the credential in build is the key-point of this problem.</p>
+<h2 id="Third-Party-Buildpack-Solutions"><a href="#Third-Party-Buildpack-Solutions" class="headerlink" title="Third-Party Buildpack Solutions"></a>Third-Party Buildpack Solutions</h2><p>In fact, there are some third-party buildpacks supporting setting github tokens or ssh-keys in the environments:</p>
+<ul>
+<li><a href="https://elements.heroku.com/buildpacks/heroku/heroku-buildpack-github-netrc" target="_blank" rel="noopener">heroku-buildpack-github-netrc</a></li>
+<li><a href="https://elements.heroku.com/buildpacks/debitoor/ssh-private-key-buildpack" target="_blank" rel="noopener">ssh-private-key-buildpack</a></li>
+</ul>
+<p>But after our discussion, we decide not to use third-party buildpacks because the following reasons</p>
+<ul>
+<li>maintenance: everyone who joins related projects needs to know the buildpack and maintain them if anything changes.</li>
+<li>security: we don’t know what things happen if we do not review the code.</li>
+</ul>
+<p>(I’ve reviewed the code, both of them are pretty simple and pretty useful. You can config your credentials in environment variables and the buildpacks will set for your purpose.)</p>
+<h2 id="Solution-without-Using-Third-Party-Buildpacks"><a href="#Solution-without-Using-Third-Party-Buildpacks" class="headerlink" title="Solution without Using Third-Party Buildpacks"></a>Solution without Using Third-Party Buildpacks</h2><p>With some survey on the heroku buildpacks, we found a good solution that helps us solve this problem. To learn the solution, we need to know more about how heroku python buildpack works first. Herkuo python buildpack will execute the following commands in order:</p>
+<ol>
+<li><code>bin/detect</code></li>
+<li><code>bin/pre_compile</code></li>
+<li><code>bin/compile</code>: in this step, it will execute <code>pip install -r requirments.txt</code> here.</li>
+<li><code>bin/post_compile</code></li>
+<li><code>bin/release</code></li>
+</ol>
+<p>With the knowledge, we tried the steps:</p>
+<ol>
+<li>Setup environment variables <code>GITHUB_USER</code> and <code>GITHUB_PASSWORD</code></li>
+<li>Put the file <code>bin/pre_compile</code> with link generation code like:</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># !/bin/bash</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> <span class="string">"Generate myrepo to requirements.txt"</span></span><br><span class="line">MY_REPO_GIT=<span class="string">"git+https://<span class="variable">$&#123;GITHUB_USER&#125;</span>:<span class="variable">$&#123;GITHUB_PASSWORD&#125;</span>@github.com/my_account/myrepo.git"</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> MY_REPO_GIT &gt;&gt; requirements.txt</span><br></pre></td></tr></table></figure>
+
+<p>and it will generate private repos link with user information to <code>requirements.txt</code> before executing <code>bin/compile</code>. Finally it can install all things your want with this solution.</p>
+<h2 id="Failed-Try"><a href="#Failed-Try" class="headerlink" title="Failed Try"></a>Failed Try</h2><p>We’ve tried to use <code>setup.py</code> to do customization in installation but it didn’t work because heroku team thinks <code>setup.py</code> can do everything and it’s unsafe if exposing all build environment settings on it.</p>
+<h2 id="Thoughts"><a href="#Thoughts" class="headerlink" title="Thoughts"></a>Thoughts</h2><p>It’s a pretty interesting journey when knowing how the buildpack works and figuring out the code for me haha. But <code>pre_compile</code> seems a deprecated feature in heroku. Not sure when it will be removed.</p>
+<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><ul>
+<li><a href="https://devcenter.heroku.com/articles/buildpacks" target="_blank" rel="noopener">Heroku Buildpacks</a></li>
+<li><a href="https://github.com/heroku/heroku-buildpack-python/blob/master/bin/compile" target="_blank" rel="noopener">bin/compile</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/python/" rel="tag"># python</a>
+              <a href="/tags/github/" rel="tag"># github</a>
+              <a href="/tags/heroku/" rel="tag"># heroku</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/03/29/beautiful-machine-learning-pipeline-with-scikit-learn/" rel="prev" title="Beautiful Machine Learning Pipeline with Scikit Learn">
+      <i class="fa fa-chevron-left"></i> Beautiful Machine Learning Pipeline with Scikit Learn
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/03/29/%E8%B3%87%E6%96%99%E7%A7%91%E5%AD%B8%E6%9E%B6%E6%A7%8B%E9%9B%9C%E8%A8%98-I/" rel="next" title="資料科學架構雜記(I) — Why Python for Data Architecture">
+      資料科學架構雜記(I) — Why Python for Data Architecture <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目錄
+        </li>
+        <li class="sidebar-nav-overview">
+          本站概要
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Goal"><span class="nav-number">1.</span> <span class="nav-text">Goal</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Third-Party-Buildpack-Solutions"><span class="nav-number">2.</span> <span class="nav-text">Third-Party Buildpack Solutions</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Solution-without-Using-Third-Party-Buildpacks"><span class="nav-number">3.</span> <span class="nav-text">Solution without Using Third-Party Buildpacks</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Failed-Try"><span class="nav-number">4.</span> <span class="nav-text">Failed Try</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Thoughts"><span class="nav-number">5.</span> <span class="nav-text">Thoughts</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#References"><span class="nav-number">6.</span> <span class="nav-text">References</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">bruce3557</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">13</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">bruce3557</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 強力驅動
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

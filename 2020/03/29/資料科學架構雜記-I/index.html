@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"bruce3557.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="換新工作已經一段時間, 想整理一下一些在這裡建立 data archiecture 的一些問題. 我目前的工作主要負責的東西大部分是處理跟資料有關的問題, 剛來的時候最基礎的一個問題就是要決定架構的大方向跟”要用什麼語言 implement ”. 一般來說講到關於資料處理的語言頗多, 例如R, Java, Scala, Python … 等等. 但是我們比較貪心一點, 想要找到一種大部分可以通吃的">
+<meta property="og:type" content="article">
+<meta property="og:title" content="資料科學架構雜記(I) — Why Python for Data Architecture">
+<meta property="og:url" content="http://bruce3557.github.io/2020/03/29/%E8%B3%87%E6%96%99%E7%A7%91%E5%AD%B8%E6%9E%B6%E6%A7%8B%E9%9B%9C%E8%A8%98-I/index.html">
+<meta property="og:site_name" content="魯斯雜想">
+<meta property="og:description" content="換新工作已經一段時間, 想整理一下一些在這裡建立 data archiecture 的一些問題. 我目前的工作主要負責的東西大部分是處理跟資料有關的問題, 剛來的時候最基礎的一個問題就是要決定架構的大方向跟”要用什麼語言 implement ”. 一般來說講到關於資料處理的語言頗多, 例如R, Java, Scala, Python … 等等. 但是我們比較貪心一點, 想要找到一種大部分可以通吃的">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2020-03-29T07:46:15.000Z">
+<meta property="article:modified_time" content="2021-09-18T17:50:33.514Z">
+<meta property="article:author" content="bruce3557">
+<meta property="article:tag" content="machine-learning">
+<meta property="article:tag" content="data">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://bruce3557.github.io/2020/03/29/%E8%B3%87%E6%96%99%E7%A7%91%E5%AD%B8%E6%9E%B6%E6%A7%8B%E9%9B%9C%E8%A8%98-I/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-TW'
+  };
+</script>
+
+  <title>資料科學架構雜記(I) — Why Python for Data Architecture | 魯斯雜想</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">魯斯雜想</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">我也不知道我在幹嘛 XD</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="http://bruce3557.github.io/2020/03/29/%E8%B3%87%E6%96%99%E7%A7%91%E5%AD%B8%E6%9E%B6%E6%A7%8B%E9%9B%9C%E8%A8%98-I/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="bruce3557">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="魯斯雜想">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          資料科學架構雜記(I) — Why Python for Data Architecture
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+
+              <time title="創建時間：2020-03-29 15:46:15" itemprop="dateCreated datePublished" datetime="2020-03-29T15:46:15+08:00">2020-03-29</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新於</span>
+                <time title="修改時間：2021-09-19 01:50:33" itemprop="dateModified" datetime="2021-09-19T01:50:33+08:00">2021-09-19</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>換新工作已經一段時間, 想整理一下一些在這裡建立 data archiecture 的一些問題. 我目前的工作主要負責的東西大部分是處理跟資料有關的問題, 剛來的時候最基礎的一個問題就是要決定架構的大方向跟”要用什麼語言 implement ”. 一般來說講到關於資料處理的語言頗多, 例如R, Java, Scala, Python … 等等. 但是我們比較貪心一點, 想要找到一種大部分可以通吃的語言來當作我們的基礎(當然通吃也有一些 tradeoff 要取捨), 下面列出當時在規劃的時候主要在思考的幾個問題</p>
+<h2 id="需要架構的服務"><a href="#需要架構的服務" class="headerlink" title="需要架構的服務"></a>需要架構的服務</h2><ul>
+<li>ETL Workflow System</li>
+<li>Data Processing</li>
+<li>Machine Learning Model Training</li>
+<li>Data Analysis</li>
+<li>API Serving</li>
+</ul>
+<h2 id="工程上的考量"><a href="#工程上的考量" class="headerlink" title="工程上的考量"></a>工程上的考量</h2><h3 id="簡單一致的tech-stack"><a href="#簡單一致的tech-stack" class="headerlink" title="簡單一致的tech stack"></a>簡單一致的tech stack</h3><ul>
+<li>減少開發上需要維護的環境, 舉例來說: 同時存在 python 跟 scala 兩種 language, dependency control 可能會需要有兩套 (pip for python and sbt for scala)</li>
+<li>在目前來說還沒有需要遇到同時存在兩種以上語言來做事的情境出現 (通常感覺問題會遇到是在超大資料或是 API layer 的response time 很要求的狀況下, 會考慮採用 java / scala 來加速程式)<h3 id="快速開發-但需要維持一定的品質"><a href="#快速開發-但需要維持一定的品質" class="headerlink" title="快速開發, 但需要維持一定的品質"></a>快速開發, 但需要維持一定的品質</h3>在這邊時常會遇到一個問題: 我們應該要自己架構 open source 服務或者是用現存有人做好的服務來用. 其實常常都是一個來來回回幾次的討論, 不停地嘗試比較來做一個決定, 但後來有一些 pattern 可以遵循:</li>
+</ul>
+<ul>
+<li><p><strong>Deliver 的速度與開發品質的 Tradeoff</strong><br>因為我們是 startup, 所以 deliver 的速度是重要考量因子(但不是唯一), 如果現存有人已經有不錯的 solution (不一定 100% fit 你的需求, 但有 80% 左右), 那就先用, 以整個系統建置速度為一個重要的考量點. 當然, 也需要考慮之後要轉換成自己做的 effort 跟整個架構的彈性程度.</p>
+</li>
+<li><p><strong>選擇現存的 solution 的好壞</strong></p>
+<ul>
+<li>好處: 不需要處理 operation 的部分, 有問題的時候 forward 給他們(通常一些小 service 的處理速度都很快)</li>
+<li>壞處: 會比較花錢, 但這個有點算是一個 tradeoff, 省時費 $$, 省 $$ 費時, 主要可能要看 budget 的承受程度, 來決定要不要使用一個服務或是自己做.<h3 id="Machine-Learning-Model-好整合"><a href="#Machine-Learning-Model-好整合" class="headerlink" title="Machine Learning Model 好整合"></a>Machine Learning Model 好整合</h3>ML model 整合有幾個形式, 其中會有一個 model file, 讓 service (例如web API) 讀進去之後做一些 predict 的事情, 所以會牽扯到在訓練完 model 之後必須輸出到 model file 或是在程式裡面讀取算好的 model 出來用的過程(詳細的一些介紹可以參考這裏 <a href="https://www.slideshare.net/VilluRuusmann/on-the-representation-and-reuse-of-machine-learning-ml-models" target="_blank" rel="noopener">https://www.slideshare.net/VilluRuusmann/on-the-representation-and-reuse-of-machine-learning-ml-models</a>).</li>
+</ul>
+</li>
+</ul>
+<h2 id="SQL"><a href="#SQL" class="headerlink" title="SQL"></a>SQL</h2><p>在資料處理中, 與 database 或是 data warehouse 做抽取或是一些 ORM model 的底層都是實作一些 SQL 的介面, 擁有一個好的 programming 介面來處理資料會是一個大利多. 其實每個語言都有實作自己個 SQL interface, 所以這端的差異不大.</p>
+<hr>
+<h1 id="Why-Python"><a href="#Why-Python" class="headerlink" title="Why Python?"></a>Why Python?</h1><p>在思考了上述的問題之後, 後來我們選擇了 python, 主要選擇的脈絡大概是這樣想</p>
+<ol>
+<li>python machine learning 的 model 整合度比較簡單<ul>
+<li>這個部分在開源界裡面, 機器學習的套件發展的比較廣為人知, 這個部分的處理支援也相對高.</li>
+<li>不管是小規模的 ML model(scikit learn or keras) 或是大規模的 ML model(Spark, Google Cloud ML + Tensorflow), 都有 python programming interface.</li>
+</ul>
+</li>
+<li>Data Processing<br>在資料處理方面, 不管是大資料的處理(可以用 Spark or Google Cloud Dataflow)或是小規模的處理(可以用 pandas), python 都有不錯的支援度. 至於為什麼會需要處理兩種規模的資料呢, 原因是因為我們還在養一些資料, 所以一開始感覺還不用使用牛刀來殺雞. 可以先從單機處理開始.</li>
+<li>在 data science / engineering 的 community support 也比較足夠:<br>並不是說其他的語言 support 不夠, 而是在各個面向上來說(data processing / ML / ETL / workflow system), python平均的水準都很高.</li>
+<li>基於以上幾點加上我們希望在初期可以先維持系統生態的多樣性不要太高, 所以在決定基礎語言的時候就選擇使用了 python.</li>
+</ol>
+<hr>
+<h1 id="Service-Open-Source-Project選擇"><a href="#Service-Open-Source-Project選擇" class="headerlink" title="Service / Open Source Project選擇"></a>Service / Open Source Project選擇</h1><p>在這個 section 主要想簡單記錄一下我們選擇的 service / framework, 至於選擇的比較心得或是踩雷細節可能會再嘗試寫寫看XD</p>
+<h2 id="ETL"><a href="#ETL" class="headerlink" title="ETL"></a>ETL</h2><p>初期最重要的部分大概就是要建置 data warehouse, 在初期的目標都是先以 SLA 比較長的 analytics data 為準, 所以 batch 的 ETL 就相對重要許多. 在這一端, 可以分成兩個部分:</p>
+<ul>
+<li>Workflow Scheduler: <a href="https://airflow.apache.org/" target="_blank" rel="noopener">Apache Airflow</a>, 不過用了一陣子之後發現有一些雷…</li>
+<li>Data Processing Framework: local from Airflow worker (small data) + Google DataFlow (large or streaming data)</li>
+</ul>
+<h2 id="Machine-Learning"><a href="#Machine-Learning" class="headerlink" title="Machine Learning"></a>Machine Learning</h2><p>在這一塊不論資料大小, 都有適合的東西可以用, 也都可以很簡單的 integrate into system.</p>
+<ul>
+<li>單機訓練: Scikit Learn / Keras for deep learning</li>
+<li>分散式訓練: Spark / Sparkit Learn / Google Cloud ML</li>
+</ul>
+<h2 id="Data-Warehousing"><a href="#Data-Warehousing" class="headerlink" title="Data Warehousing"></a>Data Warehousing</h2><p>這個部分, 當初的討論是覺得還不需要自己建構龐大的生態系(從儲存架構(HDFS)開始架之類的), 所以有 survey 一些 service, 像是 Google BigQuery / AWS Redshift / Snowflake. 後來我們採用的是 BigQuery, 主要原因是 community 看起來不小, 然後是以量計費, 對於採用漸進式思維開發的我們來說其實是很適合的.<br>然後有趣的事情是, pandas 也有支援從 BigQuery 讀取成 dataframe 的功能, 所以在一些基礎開發上也可以很簡單的整合..</p>
+<h2 id="Data-Analysis"><a href="#Data-Analysis" class="headerlink" title="Data Analysis"></a>Data Analysis</h2><p>For non Engineer members<br>通常是做一些簡單的資料拉取跟視覺化, 發現進來的時候其實這塊做的已經很不錯!<br>所以我在這邊做的事情除了把資料灌到 data warehouse 去 serve 一些比較算不完的 query 之外就是幫助他們做一些比較困難直接用 SQL 達成的分析</p>
+<p>以我們一般使用情境上來看</p>
+<ul>
+<li>Lanuage: SQL, 這個好像毋庸置疑, SQL 現在就是拉資料 + 分析的一個標準語言</li>
+<li>Open Source: Metabase ← 必須說 metabase 是神器, 可以連接很多個不同種類的資料庫(for example: PostgreSQL 跟 BigQuery)的同時也可以做一些視覺化. 所以如果一些常常需要看數據的人(marketing / sales)會寫一些 SQL 的話, 就可以自己做到很多事情.</li>
+</ul>
+<p>For Engineer / Scientist / Analyst</p>
+<ul>
+<li>For 更進階或複雜的資料分析問題</li>
+<li>Python(pandas for data processing + matplotlib / seaborn for visualizaiton) + SQL</li>
+</ul>
+<h2 id="API-Layer"><a href="#API-Layer" class="headerlink" title="API Layer"></a>API Layer</h2><p>這裡就比較單純回到有點像 web 開發的情境了, 在可以 model loading 的方式下, 討論上是想找一個 community support 不錯, 但是又沒有像 Django 限制那麼重的套件. 於是我們選擇了 Flask.</p>
+<hr>
+<h1 id="小結"><a href="#小結" class="headerlink" title="小結"></a>小結</h1><p>除了以上的點, 其實在架構整個系統的每個過程中也各自會遇到不同的問題 (for example: CI/CD 怎麼做比較好, model 開發的時候 deploy 的問題), 有機會也想再寫一篇來討論討論.</p>
+<p>寫這篇的目的其實比較傾向於嘗試提出一些思考點而不是絕對值或是教學說什麼東西怎麼用(主要是感覺這類的記事文章比較少所以想嘗試紀錄看看 XD). 如果有覺得不夠好的地方再請閱讀的大大們不吝指教一下~</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/machine-learning/" rel="tag"># machine-learning</a>
+              <a href="/tags/data/" rel="tag"># data</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/03/29/deploy-private-github-python-packages-on-heroku-without-exposing-credentials/" rel="prev" title="Deploy Private Github Python Packages on Heroku without Exposing Credentials">
+      <i class="fa fa-chevron-left"></i> Deploy Private Github Python Packages on Heroku without Exposing Credentials
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/03/29/%E8%B3%87%E6%96%99%E7%A7%91%E5%AD%B8%E6%9E%B6%E6%A7%8B%E9%9B%9C%E8%A8%98-II/" rel="next" title="資料科學架構雜記(II) — 淺談資料處理的重要性">
+      資料科學架構雜記(II) — 淺談資料處理的重要性 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目錄
+        </li>
+        <li class="sidebar-nav-overview">
+          本站概要
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#需要架構的服務"><span class="nav-number">1.</span> <span class="nav-text">需要架構的服務</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#工程上的考量"><span class="nav-number">2.</span> <span class="nav-text">工程上的考量</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#簡單一致的tech-stack"><span class="nav-number">2.1.</span> <span class="nav-text">簡單一致的tech stack</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#快速開發-但需要維持一定的品質"><span class="nav-number">2.2.</span> <span class="nav-text">快速開發, 但需要維持一定的品質</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Machine-Learning-Model-好整合"><span class="nav-number">2.3.</span> <span class="nav-text">Machine Learning Model 好整合</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SQL"><span class="nav-number">3.</span> <span class="nav-text">SQL</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Why-Python"><span class="nav-number"></span> <span class="nav-text">Why Python?</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Service-Open-Source-Project選擇"><span class="nav-number"></span> <span class="nav-text">Service &#x2F; Open Source Project選擇</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#ETL"><span class="nav-number">1.</span> <span class="nav-text">ETL</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Machine-Learning"><span class="nav-number">2.</span> <span class="nav-text">Machine Learning</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Data-Warehousing"><span class="nav-number">3.</span> <span class="nav-text">Data Warehousing</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Data-Analysis"><span class="nav-number">4.</span> <span class="nav-text">Data Analysis</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#API-Layer"><span class="nav-number">5.</span> <span class="nav-text">API Layer</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#小結"><span class="nav-number"></span> <span class="nav-text">小結</span></a></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">bruce3557</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">13</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">bruce3557</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 強力驅動
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

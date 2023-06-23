@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"bruce3557.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="這個主題是在今天坐公車的時候想到的, 所以想說回家趁晚上的時候趕快把它整理整理寫出來XDD 比較主要的目的可能是想要聊聊好好做資料處理對機器學習專案&#x2F;分析專案的重要性吧 為什麼想要寫這個工作到現在也有累積一些經驗, 現實中的生活常常會發現不是像做學術或是想像中的美好XDD. 經手過一些專案或是跟一些其他公司的人, 或是接案的人在聊, 其實常常發現在最基礎的基礎 — 能夠好好做學習或分析的資料其實都">
+<meta property="og:type" content="article">
+<meta property="og:title" content="資料科學架構雜記(II) — 淺談資料處理的重要性">
+<meta property="og:url" content="http://bruce3557.github.io/2020/03/29/%E8%B3%87%E6%96%99%E7%A7%91%E5%AD%B8%E6%9E%B6%E6%A7%8B%E9%9B%9C%E8%A8%98-II/index.html">
+<meta property="og:site_name" content="魯斯雜想">
+<meta property="og:description" content="這個主題是在今天坐公車的時候想到的, 所以想說回家趁晚上的時候趕快把它整理整理寫出來XDD 比較主要的目的可能是想要聊聊好好做資料處理對機器學習專案&#x2F;分析專案的重要性吧 為什麼想要寫這個工作到現在也有累積一些經驗, 現實中的生活常常會發現不是像做學術或是想像中的美好XDD. 經手過一些專案或是跟一些其他公司的人, 或是接案的人在聊, 其實常常發現在最基礎的基礎 — 能夠好好做學習或分析的資料其實都">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2020-03-29T07:48:09.000Z">
+<meta property="article:modified_time" content="2021-09-18T17:50:33.514Z">
+<meta property="article:author" content="bruce3557">
+<meta property="article:tag" content="machine-learning">
+<meta property="article:tag" content="data">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://bruce3557.github.io/2020/03/29/%E8%B3%87%E6%96%99%E7%A7%91%E5%AD%B8%E6%9E%B6%E6%A7%8B%E9%9B%9C%E8%A8%98-II/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-TW'
+  };
+</script>
+
+  <title>資料科學架構雜記(II) — 淺談資料處理的重要性 | 魯斯雜想</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">魯斯雜想</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">我也不知道我在幹嘛 XD</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="http://bruce3557.github.io/2020/03/29/%E8%B3%87%E6%96%99%E7%A7%91%E5%AD%B8%E6%9E%B6%E6%A7%8B%E9%9B%9C%E8%A8%98-II/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="bruce3557">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="魯斯雜想">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          資料科學架構雜記(II) — 淺談資料處理的重要性
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+
+              <time title="創建時間：2020-03-29 15:48:09" itemprop="dateCreated datePublished" datetime="2020-03-29T15:48:09+08:00">2020-03-29</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新於</span>
+                <time title="修改時間：2021-09-19 01:50:33" itemprop="dateModified" datetime="2021-09-19T01:50:33+08:00">2021-09-19</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>這個主題是在今天坐公車的時候想到的, 所以想說回家趁晚上的時候趕快把它整理整理寫出來XDD 比較主要的目的可能是想要聊聊好好做資料處理對機器學習專案/分析專案的重要性吧</p>
+<h1 id="為什麼想要寫這個"><a href="#為什麼想要寫這個" class="headerlink" title="為什麼想要寫這個"></a>為什麼想要寫這個</h1><p>工作到現在也有累積一些經驗, 現實中的生活常常會發現不是像做學術或是想像中的美好XDD. 經手過一些專案或是跟一些其他公司的人, 或是接案的人在聊, 其實常常發現在最基礎的基礎 — 能夠好好做學習或分析的資料其實都沒有辦法很好的得到 (白話一點就是: $@#$@#資料這麼多問題叫我做個雕), 但其實在需要做好這些基礎工程的時間基本上project的時程差不多或是更久. 而且做一個”好的”資料處理大部分不是會對公司或是距離細節比較遙遠的人能夠理解的事情, 在討論schedule或是發表完成報告的時候常常會覺得說服力相對以feature(像是ML專案的結果)弱很多, 所以想嘗試看看能不能寫出好好做資料處理的優點跟投資在這個上面可以得到怎麼樣的結果.</p>
+<h2 id="聊聊Kaggle的資料"><a href="#聊聊Kaggle的資料" class="headerlink" title="聊聊Kaggle的資料"></a>聊聊Kaggle的資料</h2><p>不管在Kaggle或是學術上, 大部分的資料集其實都做過一定的整理, 所以很多工程上的事情相對來說問題不大, 留下來的會需要處理的部份大部分都是在做feature變換當中需要在意的部分, 舉例來說像是要怎麼處理missing values或是說feature之間要不要做standardize / normalization…<br>所以在做kaggle的題目的時候其實我們可以專注或是很快的進入狀況, 但是到了現實世界之後世界可能就不一樣了. 現實生活中其實常常會有各種意想不到關於資料本身的問題XD, 發現的問題通常是類似下面的問題其中之一:<br>“欸幹為什麼有些人的住址郵遞區號是放在額外的欄位的, 有些人是放在 plaintext的欄位裡面?”<br>“怎麼好像我要的資料在某個時間點之後就不見了XDDDD?” (原來是在某時間之後被移到另一個地方去了)<br>“之前好像有一陣子系統壞掉, 那個時期的label不是很正確QQ”<br>“商品種類怎麼用__product_type: xxx的格式存在plaintext裡面@@”<br>…還有各種千奇百怪的問題XD<br>所以其實在分析專案或是ML專案進入研究跟探索的狀態之前, 去解決這些關於資料上的問題都是為了讓這個專案可以好好研究跟探索.</p>
+<h1 id="簡介資料處理的細節"><a href="#簡介資料處理的細節" class="headerlink" title="簡介資料處理的細節"></a>簡介資料處理的細節</h1><p>這個部分比較想要強調的是關於資料處理本身, 在工程面像是架構本身的東西就不再探討的範圍裡面. 所謂好用的資料, 以目前到現在的經驗, 可以得到幾個等級上的好資料</p>
+<h3 id="Leve-1-正確的資料"><a href="#Leve-1-正確的資料" class="headerlink" title="Leve 1. 正確的資料"></a>Leve 1. 正確的資料</h3><p>這邊指的正確資料主要講的是我們採集到的每一筆資料本身裡面填得值都是正確的. 舉例來說, 上面提到的郵遞區號的問題就應該在做專案的時候可以在資料裡面有一個欄位直接可以拉到.</p>
+<h3 id="Level-2-正確的資料關係"><a href="#Level-2-正確的資料關係" class="headerlink" title="Level 2. 正確的資料關係"></a>Level 2. 正確的資料關係</h3><p>假若A表跟B表有關係, 如果A表裡面的a跟B表裡面的b有關係, 這個關係必須要是正確的. 以上面提到的<br>“怎麼好像我要的資料在某個時間點之後就不見了XDDDD?” (原來是在某時間之後被移到另一個地方去了)<br>這個問題來說, 比較好的作法會是有一個表把移動之前跟移動之後的資料整合在一起.</p>
+<h3 id="Level-3-好用的格式"><a href="#Level-3-好用的格式" class="headerlink" title="Level 3. 好用的格式"></a>Level 3. 好用的格式</h3><p>以現在拉資料要寫SQL來說, 基本上會發現有時候會去存json field, 或是會以一些固定的pattern存在純文字的欄位裡面, 像是上面說的<br>“商品種類怎麼用__product_type: xxx的格式存在plaintext裡面@@”<br>以json格式來說, 現在蠻多database都有支援json query所以寫起來其實還好, 但是不好的事情是因為他不是一個可以直接被查到的schema, 所以在使用上如果今天不知道某個欄位放在json裡的話會花一些時間去尋找某個資料在哪裡.<br>而用某種固定格式放在純文字欄位裡的話, 可以想像的事情是需要寫parser把他處理好. 這種effort相對來說就會比較大.<br>比較理想的狀態是在做專案之前就可以把這些明確有意義的且有可能被用到的東西先拆出來存.</p>
+<h3 id="Level-4-好用的分析-應用表"><a href="#Level-4-好用的分析-應用表" class="headerlink" title="Level 4. 好用的分析 / 應用表"></a>Level 4. 好用的分析 / 應用表</h3><p>這個可能是一個很理想的狀態, 可以想像是說, 今天我要用什麼資料只要用一次select就可以單純地拿到. 一個表就代表一個分析的主體(e.g., user, 商品, category, …), 需要在意的只是我要拿user和商品一起考量要怎麼做以及這兩個東西一起考慮的話我們要計算的是怎麼樣的metrics等等之類的問題. 為了達到這件事其實是需要花很大量的工的, 必須要討論分析上常用的情境是什麼, 怎麼樣才不會overdesign 等等的. 算是蠻吃經驗的一項工作. 但如果做得好的話其實全公司都會感謝你XD (默默想到以前在yahoo做這一塊的大前輩們… XD)</p>
+<h2 id="以分析的角度來看資料處理的重要性"><a href="#以分析的角度來看資料處理的重要性" class="headerlink" title="以分析的角度來看資料處理的重要性"></a>以分析的角度來看資料處理的重要性</h2><p>以分析上來說其實最害怕是沒有記錄到該紀錄的資料或是資料之間的關聯性並不強 / 很難整理等等的. 像是某個時間點紀錄上資料有問題之類的事情, 會導致那段時間的資料不可信任或是根本沒辦法看, 但以資料分析來說, 沒有資料何來分析呢?<br>那如果資料對了, 但是很難整理的話, 要產生一個有insight的report對分析師來說也是effort超大的. 這時候如果有Level 4等級的資料, 其實是可以大大增加分析師的工作效率的.</p>
+<h2 id="以演算法的角度看資料處理的重要性"><a href="#以演算法的角度看資料處理的重要性" class="headerlink" title="以演算法的角度看資料處理的重要性"></a>以演算法的角度看資料處理的重要性</h2><p>而從機器學習演算法本身來看, 其實太多錯誤的資料會造成演算法本身的偏差. 舉例以推薦系統經典應用的演算法Matrix Factorization來說, 雖然他可以去預測user對某個item的好感度即使在矩陣中這個值是空的, 但其實當今天資料點越多的時候其實準確度本身是會上升的, 假設因為一些資料處理的誤差導致很多資料是不能用的或是更誇張的記錯user喜歡的item, 那可以想像的是model的performance必定會下降. 最嚴重是會導致完全無法學習的狀況. 把這樣的想像往其他做法推其實也一樣, 有些演算法說是可以照顧到空值, 但其實可以想像的事情是機器跟人一樣, 看得到越完整的東西所做出來的決定越不會有太大的落差.</p>
+<h1 id="資料處理應該歸屬在哪個範疇"><a href="#資料處理應該歸屬在哪個範疇" class="headerlink" title="資料處理應該歸屬在哪個範疇"></a>資料處理應該歸屬在哪個範疇</h1><p>其實常常看PTT在討論的時候會說台灣的data scientist需要會engineering也要會engineering的東西也要會science的東西, 一個人當多個人用. 某個程度上好像不是很能否認這一點. 但其實撇開架構端, 以上述聊到實際的商業資料處理本身來說, 我認為事情是這樣的:</p>
+<h2 id="寫Code層面"><a href="#寫Code層面" class="headerlink" title="寫Code層面"></a>寫Code層面</h2><p>這個部分我認為不管是scientist寫或是engineering寫都沒關係, 主要重要的事情會是處理的邏輯正不正確跟工程上的quality好不好, 所以不管是誰寫另外一個角色的人都需要去review對方的作品(science review處理邏輯, engineer review工程上的細節). 這樣才能達到一個比較平衡的境界</p>
+<h2 id="制定schema"><a href="#制定schema" class="headerlink" title="制定schema"></a>制定schema</h2><p>另外更重要的事情是關於怎麼訂schema, 在做這類的事情的時候其實非常需要各方面的feedback, 告訴做的人在商業上重視的是什麼樣的數字, 讓他們去規劃怎麼樣使用. 某個程度上其實跟product的開發有異曲同工之妙啊~<br>這邊想提到的一點是這類schema的制定跟backend在開發的時候制定的規則不太一樣, 有興趣的人可以去看看OLTP跟OLAP的schema怎麼設計. 這邊就不再贅述了 =)</p>
+<h1 id="小結"><a href="#小結" class="headerlink" title="小結"></a>小結</h1><p>之前在聽talk的時候常常有人說 “Data的project常常需要花80%的時間去做data wrangling”, 這句話其實並不假. 但是如果在做一些warehousing或是data product的時候能夠先把這類的mindset考慮進去的話, 我想是有機會把80%再縮短一點的XD, 或是其他專案可以reuse這個的結果是可以增加分析或是學習專案做探索的效率很多的.<br>寫完的感想<br>其實要把這類的事情寫清楚還是覺得複雜度很高, 尤其這個主題又好像大家都知道但很少人寫 在寫的時候其實要釐清很多事情XD(像是問題通常是哪一類型, 應該要怎麼寫等等的). 在寫紀錄的路上繼續努力QQ</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/machine-learning/" rel="tag"># machine-learning</a>
+              <a href="/tags/data/" rel="tag"># data</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/03/29/%E8%B3%87%E6%96%99%E7%A7%91%E5%AD%B8%E6%9E%B6%E6%A7%8B%E9%9B%9C%E8%A8%98-I/" rel="prev" title="資料科學架構雜記(I) — Why Python for Data Architecture">
+      <i class="fa fa-chevron-left"></i> 資料科學架構雜記(I) — Why Python for Data Architecture
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/03/29/machine-learning-practical-stacking-ensemble-%E5%B0%8F%E6%95%B4%E7%90%86/" rel="next" title="Machine Learning Practical - Stacking Ensemble 小整理">
+      Machine Learning Practical - Stacking Ensemble 小整理 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目錄
+        </li>
+        <li class="sidebar-nav-overview">
+          本站概要
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#為什麼想要寫這個"><span class="nav-number">1.</span> <span class="nav-text">為什麼想要寫這個</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#聊聊Kaggle的資料"><span class="nav-number">1.1.</span> <span class="nav-text">聊聊Kaggle的資料</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#簡介資料處理的細節"><span class="nav-number">2.</span> <span class="nav-text">簡介資料處理的細節</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Leve-1-正確的資料"><span class="nav-number">2.0.1.</span> <span class="nav-text">Leve 1. 正確的資料</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Level-2-正確的資料關係"><span class="nav-number">2.0.2.</span> <span class="nav-text">Level 2. 正確的資料關係</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Level-3-好用的格式"><span class="nav-number">2.0.3.</span> <span class="nav-text">Level 3. 好用的格式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Level-4-好用的分析-應用表"><span class="nav-number">2.0.4.</span> <span class="nav-text">Level 4. 好用的分析 &#x2F; 應用表</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#以分析的角度來看資料處理的重要性"><span class="nav-number">2.1.</span> <span class="nav-text">以分析的角度來看資料處理的重要性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#以演算法的角度看資料處理的重要性"><span class="nav-number">2.2.</span> <span class="nav-text">以演算法的角度看資料處理的重要性</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#資料處理應該歸屬在哪個範疇"><span class="nav-number">3.</span> <span class="nav-text">資料處理應該歸屬在哪個範疇</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#寫Code層面"><span class="nav-number">3.1.</span> <span class="nav-text">寫Code層面</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#制定schema"><span class="nav-number">3.2.</span> <span class="nav-text">制定schema</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#小結"><span class="nav-number">4.</span> <span class="nav-text">小結</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">bruce3557</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">13</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">bruce3557</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 強力驅動
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

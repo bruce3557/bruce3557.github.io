@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"bruce3557.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="想分享一下怎麼做 database tuning。在實務上，我們會看每個不同的 query 去做特化的調整。這邊會帶最近我在做的 case 來跟大家討論一下做 database 優化的步驟。 Query 優化之路12345678SELECT    primary_key,    aggr_row,    count AS row_countFROM    dataINNER JOIN ( VALU">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Tuning Postgres Performance">
+<meta property="og:url" content="http://bruce3557.github.io/2020/03/30/tuning-postgres-performance/index.html">
+<meta property="og:site_name" content="魯斯雜想">
+<meta property="og:description" content="想分享一下怎麼做 database tuning。在實務上，我們會看每個不同的 query 去做特化的調整。這邊會帶最近我在做的 case 來跟大家討論一下做 database 優化的步驟。 Query 優化之路12345678SELECT    primary_key,    aggr_row,    count AS row_countFROM    dataINNER JOIN ( VALU">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2020-03-29T16:41:43.000Z">
+<meta property="article:modified_time" content="2021-09-18T17:50:33.514Z">
+<meta property="article:author" content="bruce3557">
+<meta property="article:tag" content="postgresql">
+<meta property="article:tag" content="database">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://bruce3557.github.io/2020/03/30/tuning-postgres-performance/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-TW'
+  };
+</script>
+
+  <title>Tuning Postgres Performance | 魯斯雜想</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">魯斯雜想</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">我也不知道我在幹嘛 XD</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="http://bruce3557.github.io/2020/03/30/tuning-postgres-performance/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="bruce3557">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="魯斯雜想">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Tuning Postgres Performance
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+
+              <time title="創建時間：2020-03-30 00:41:43" itemprop="dateCreated datePublished" datetime="2020-03-30T00:41:43+08:00">2020-03-30</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新於</span>
+                <time title="修改時間：2021-09-19 01:50:33" itemprop="dateModified" datetime="2021-09-19T01:50:33+08:00">2021-09-19</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>想分享一下怎麼做 database tuning。<br>在實務上，我們會看每個不同的 query 去做特化的調整。<br>這邊會帶最近我在做的 case 來跟大家討論一下做 database 優化的步驟。</p>
+<h1 id="Query-優化之路"><a href="#Query-優化之路" class="headerlink" title="Query 優化之路"></a>Query 優化之路</h1><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span></span><br><span class="line">    primary_key,</span><br><span class="line">    aggr_row,</span><br><span class="line">    <span class="keyword">count</span> <span class="keyword">AS</span> <span class="keyword">row_count</span></span><br><span class="line"><span class="keyword">FROM</span></span><br><span class="line">    <span class="keyword">data</span></span><br><span class="line"><span class="keyword">INNER</span> <span class="keyword">JOIN</span> ( <span class="keyword">VALUES</span> (<span class="number">12345</span>), (<span class="number">234556</span>), (<span class="number">655222</span>) ) vals(v)</span><br><span class="line"><span class="keyword">ON</span> primary_key = v</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="Steps"><a href="#Steps" class="headerlink" title="Steps"></a>Steps</h2><ol>
+<li>用 explain / explain analyze 看 Query Plan，可以知道大概 database cost 花在哪些地方</li>
+</ol>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">+------------------------------------------------------------------------------------------------------------------------------------------------------------+</span><br><span class="line">| QUERYPLAN                                                                                                                                                 |</span><br><span class="line">------------------------------------------------------------------------------------------------------------------------------------------------------------|</span><br><span class="line">| Nested Loop  (cost=0.44..75.67 rows=958 width=23)(actual time=9.846..17.156 rows=117loops=1)                                                              |</span><br><span class="line">|   -&gt;  Values Scan on <span class="string">"*VALUES*"</span>  (cost=0.00..0.04rows=3 width=32) (actual time=0.002..0.008 rows=3loops=1)                                                |</span><br><span class="line">|   -&gt;  Index Scan using idx_primary_key_data on data (cost=0.44..22.02 rows=319 width=23) (actual time=5.698.5.707 rows=39 loops=3) |</span><br><span class="line">|         Index Cond: ((primary_key)::text = <span class="string">"*VALUES*"</span>column1)                                                                                              |</span><br><span class="line">| Planning time: 8.106ms                                                                                                                                    |</span><br><span class="line">| Execution time: 17.191ms                                                                                                                                  |</span><br><span class="line">+------------------------------------------------------------------------------------------------------------------------------------------------------------+</span><br><span class="line">EXPLAIN</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>直觀的想法 → 放 index</li>
+</ol>
+<ul>
+<li>index 的目的是告訴你說哪個 key 的哪些資料在哪個 block</li>
+<li>想像成翻書</li>
+<li>有很多種方法，不同 case 有不同的<ul>
+<li>以我們 case，其實最適合可能是 hash index（因為都是執行 equal query）。但他在 PostgreSQL 9.6 上面無法把這個 index 同步到 replica，因此我們最後還是放棄用 btree。</li>
+</ul>
+</li>
+</ul>
+<ol start="3">
+<li>比較進階的想法 → 增加 data locality 使得拿一樣人數的時候可以 access 比較少的 disk block</li>
+</ol>
+<ul>
+<li>這需要了解一點 database 的結構<ul>
+<li>實際上 database 在存資料的時候都是放在 disk 上面，分成一個個 block 讀進 memory，中間搭配一些 cache 的機制。</li>
+<li>Disk access 是很貴的</li>
+<li>當 query 一張 table 的時候，如果沒有 index 他就會把這張 table 所有資料都拿出來跑，意思就是這張 table 如果存在 2000 個 block, 就會有 disk access 2000 次</li>
+<li>加 index 的時候就是幫助你知道你一筆資料會放在哪些 block，幫助你不需要做 full table scan 就可以找到你想要的資料</li>
+<li>如果你能夠讓你的資料都放在一起，那 access block 的次數就可以變少</li>
+</ul>
+</li>
+<li>怎麼讓資料都放在一起?<ul>
+<li>根據我們的 query，可以在 ETL 的時候先把資料照 member_id 集中在一起再灌進去 DB</li>
+<li>搭配 index performance ++</li>
+<li>先灌進去之後再做 cluster index 也有可能可以得到類似的結果</li>
+</ul>
+</li>
+</ul>
+<h1 id="觀測-database-狀態"><a href="#觀測-database-狀態" class="headerlink" title="觀測 - database 狀態"></a>觀測 - database 狀態</h1><ul>
+<li><a href="https://console.cloud.google.com/sql/instances/ml-dimension-replica1/overview?project=dcard-data&amp;authuser=0&amp;organizationId=369104395863&amp;duration=P4D" target="_blank" rel="noopener">https://console.cloud.google.com/sql/instances/ml-dimension-replica1/overview?project=dcard-data&amp;authuser=0&amp;organizationId=369104395863&amp;duration=P4D</a></li>
+</ul>
+<ul>
+<li>CPU load 很高的時候可以執行下列的 query 去看看哪些 query 花很久時間～</li>
+</ul>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span></span><br><span class="line">    pid,</span><br><span class="line">    datname,</span><br><span class="line">    usename,</span><br><span class="line">    <span class="keyword">query</span>,</span><br><span class="line">    <span class="keyword">now</span>() - query_start <span class="keyword">AS</span> running_time</span><br><span class="line"><span class="keyword">FROM</span> pg_stat_activity</span><br><span class="line"><span class="keyword">ORDER</span> <span class="keyword">BY</span> <span class="number">5</span> <span class="keyword">DESC</span>;</span><br></pre></td></tr></table></figure>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/postgresql/" rel="tag"># postgresql</a>
+              <a href="/tags/database/" rel="tag"># database</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/03/30/clean-code-%E7%AD%86%E8%A8%98/" rel="prev" title="Clean Code 讀書筆記 + 雜談">
+      <i class="fa fa-chevron-left"></i> Clean Code 讀書筆記 + 雜談
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2023/06/23/%E9%96%B1%E8%AE%80%E7%AD%86%E8%A8%98%20-%2020230623/" rel="next" title="閱讀筆記 - 20230623">
+      閱讀筆記 - 20230623 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目錄
+        </li>
+        <li class="sidebar-nav-overview">
+          本站概要
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Query-優化之路"><span class="nav-number">1.</span> <span class="nav-text">Query 優化之路</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Steps"><span class="nav-number">1.1.</span> <span class="nav-text">Steps</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#觀測-database-狀態"><span class="nav-number">2.</span> <span class="nav-text">觀測 - database 狀態</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">bruce3557</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">13</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">bruce3557</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 強力驅動
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
