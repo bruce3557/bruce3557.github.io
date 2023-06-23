@@ -1,0 +1,711 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search>
+  <entry>
+    <title>初入技術管理的旅程-I</title>
+    <url>/2021/09/19/%E5%88%9D%E5%85%A5%E6%8A%80%E8%A1%93%E7%AE%A1%E7%90%86%E7%9A%84%E6%97%85%E7%A8%8B-I/</url>
+    <content><![CDATA[]]></content>
+  </entry>
+  <entry>
+    <title>Tuning Postgres Performance</title>
+    <url>/2020/03/30/tuning-postgres-performance/</url>
+    <content><![CDATA[<p>想分享一下怎麼做 database tuning。<br>在實務上，我們會看每個不同的 query 去做特化的調整。<br>這邊會帶最近我在做的 case 來跟大家討論一下做 database 優化的步驟。</p>
+<h1 id="Query-優化之路"><a href="#Query-優化之路" class="headerlink" title="Query 優化之路"></a>Query 優化之路</h1><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span></span><br><span class="line">    primary_key,</span><br><span class="line">    aggr_row,</span><br><span class="line">    <span class="keyword">count</span> <span class="keyword">AS</span> <span class="keyword">row_count</span></span><br><span class="line"><span class="keyword">FROM</span></span><br><span class="line">    <span class="keyword">data</span></span><br><span class="line"><span class="keyword">INNER</span> <span class="keyword">JOIN</span> ( <span class="keyword">VALUES</span> (<span class="number">12345</span>), (<span class="number">234556</span>), (<span class="number">655222</span>) ) vals(v)</span><br><span class="line"><span class="keyword">ON</span> primary_key = v</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="Steps"><a href="#Steps" class="headerlink" title="Steps"></a>Steps</h2><ol>
+<li>用 explain / explain analyze 看 Query Plan，可以知道大概 database cost 花在哪些地方</li>
+</ol>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">+------------------------------------------------------------------------------------------------------------------------------------------------------------+</span><br><span class="line">| QUERYPLAN                                                                                                                                                 |</span><br><span class="line">------------------------------------------------------------------------------------------------------------------------------------------------------------|</span><br><span class="line">| Nested Loop  (cost=0.44..75.67 rows=958 width=23)(actual time=9.846..17.156 rows=117loops=1)                                                              |</span><br><span class="line">|   -&gt;  Values Scan on <span class="string">"*VALUES*"</span>  (cost=0.00..0.04rows=3 width=32) (actual time=0.002..0.008 rows=3loops=1)                                                |</span><br><span class="line">|   -&gt;  Index Scan using idx_primary_key_data on data (cost=0.44..22.02 rows=319 width=23) (actual time=5.698.5.707 rows=39 loops=3) |</span><br><span class="line">|         Index Cond: ((primary_key)::text = <span class="string">"*VALUES*"</span>column1)                                                                                              |</span><br><span class="line">| Planning time: 8.106ms                                                                                                                                    |</span><br><span class="line">| Execution time: 17.191ms                                                                                                                                  |</span><br><span class="line">+------------------------------------------------------------------------------------------------------------------------------------------------------------+</span><br><span class="line">EXPLAIN</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>直觀的想法 → 放 index</li>
+</ol>
+<ul>
+<li>index 的目的是告訴你說哪個 key 的哪些資料在哪個 block</li>
+<li>想像成翻書</li>
+<li>有很多種方法，不同 case 有不同的<ul>
+<li>以我們 case，其實最適合可能是 hash index（因為都是執行 equal query）。但他在 PostgreSQL 9.6 上面無法把這個 index 同步到 replica，因此我們最後還是放棄用 btree。</li>
+</ul>
+</li>
+</ul>
+<ol start="3">
+<li>比較進階的想法 → 增加 data locality 使得拿一樣人數的時候可以 access 比較少的 disk block</li>
+</ol>
+<ul>
+<li>這需要了解一點 database 的結構<ul>
+<li>實際上 database 在存資料的時候都是放在 disk 上面，分成一個個 block 讀進 memory，中間搭配一些 cache 的機制。</li>
+<li>Disk access 是很貴的</li>
+<li>當 query 一張 table 的時候，如果沒有 index 他就會把這張 table 所有資料都拿出來跑，意思就是這張 table 如果存在 2000 個 block, 就會有 disk access 2000 次</li>
+<li>加 index 的時候就是幫助你知道你一筆資料會放在哪些 block，幫助你不需要做 full table scan 就可以找到你想要的資料</li>
+<li>如果你能夠讓你的資料都放在一起，那 access block 的次數就可以變少</li>
+</ul>
+</li>
+<li>怎麼讓資料都放在一起?<ul>
+<li>根據我們的 query，可以在 ETL 的時候先把資料照 member_id 集中在一起再灌進去 DB</li>
+<li>搭配 index performance ++</li>
+<li>先灌進去之後再做 cluster index 也有可能可以得到類似的結果</li>
+</ul>
+</li>
+</ul>
+<h1 id="觀測-database-狀態"><a href="#觀測-database-狀態" class="headerlink" title="觀測 - database 狀態"></a>觀測 - database 狀態</h1><ul>
+<li><a href="https://console.cloud.google.com/sql/instances/ml-dimension-replica1/overview?project=dcard-data&amp;authuser=0&amp;organizationId=369104395863&amp;duration=P4D" target="_blank" rel="noopener">https://console.cloud.google.com/sql/instances/ml-dimension-replica1/overview?project=dcard-data&amp;authuser=0&amp;organizationId=369104395863&amp;duration=P4D</a></li>
+</ul>
+<ul>
+<li>CPU load 很高的時候可以執行下列的 query 去看看哪些 query 花很久時間～</li>
+</ul>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span></span><br><span class="line">    pid,</span><br><span class="line">    datname,</span><br><span class="line">    usename,</span><br><span class="line">    <span class="keyword">query</span>,</span><br><span class="line">    <span class="keyword">now</span>() - query_start <span class="keyword">AS</span> running_time</span><br><span class="line"><span class="keyword">FROM</span> pg_stat_activity</span><br><span class="line"><span class="keyword">ORDER</span> <span class="keyword">BY</span> <span class="number">5</span> <span class="keyword">DESC</span>;</span><br></pre></td></tr></table></figure>
+]]></content>
+      <tags>
+        <tag>postgresql</tag>
+        <tag>database</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Clean Code 讀書筆記 + 雜談</title>
+    <url>/2020/03/30/clean-code-%E7%AD%86%E8%A8%98/</url>
+    <content><![CDATA[<p>因為 medium 實在太難用了, 所以我決定回 paper 來發文</p>
+<h1 id="本書精神"><a href="#本書精神" class="headerlink" title="本書精神"></a>本書精神</h1><p>基本上我覺得這本書主題都圍繞著這句話在走</p>
+<blockquote>
+<p>Programming is a social activity</p>
+</blockquote>
+<p>這份筆記大概會參雜一些個人的觀點在內</p>
+<p>個人覺得非常喜歡的觀念<br>關於合作開發的理念</p>
+<p>前五章我個人覺得都是在探討合作開發的一些細節, 非常實用. 自己看完了之後也反省了一下以前寫的東西</p>
+<p>以下有幾點:</p>
+<ul>
+<li>Readability 可能是最重要的, 可讀性高的程式可以幫助團隊<ul>
+<li>新人 onboard 快速上手, 舊人容易理解</li>
+<li>更快找到問題在哪裡, 不管是要加速或是 debug</li>
+<li>加快開發速度, 好讀相對於難讀來得好改動</li>
+</ul>
+</li>
+<li>延伸上一點, 所以我們需要:<ul>
+<li>好的命名</li>
+<li>有用的 comment</li>
+<li>好的 format</li>
+<li>好的抽象化</li>
+<li>切的恰如其分的 function</li>
+</ul>
+</li>
+</ul>
+<h1 id="Chap-2-Naming-Guideline"><a href="#Chap-2-Naming-Guideline" class="headerlink" title="Chap 2. Naming Guideline"></a>Chap 2. Naming Guideline</h1><p>在第二章裡面有提到一些他建議的命名方式:</p>
+<ul>
+<li>命名有意義而且清楚的名字<ul>
+<li>solution domain names</li>
+<li>problem domain names</li>
+</ul>
+</li>
+<li>除非是該領域的 convention, 否則不要隨意縮寫</li>
+<li>variable name 用名詞, method name 用動詞</li>
+</ul>
+<h1 id="Chap-3-Functions"><a href="#Chap-3-Functions" class="headerlink" title="Chap 3. Functions"></a>Chap 3. Functions</h1><ul>
+<li>function should be small<ul>
+<li>通常是不要超過一頁，雖然一定有例外，可以當成是一個有比較好的原則</li>
+<li>如果覺得不是很確定能不能縮到一頁之內，可以找大家討論</li>
+</ul>
+</li>
+<li>Single Responsibility Principle<ul>
+<li>這可能是這章最重要的觀念</li>
+<li>一個 function 只做一件事情</li>
+<li>這樣設計的同時也可以避免 side effect</li>
+</ul>
+</li>
+<li>function 的 input argument 越少越好<ul>
+<li>例外我覺得是機器學習演算法 (舉例: sklearn)，一個模型本來就會牽涉很多參數 QQ</li>
+<li>其他的部分可以盡量藏在 class initialization 裡</li>
+<li>這邊其實是藝術啊～～</li>
+</ul>
+</li>
+<li>function 盡量不要有 flag argument (像是 <code>debug=False</code>)<ul>
+<li>我也在想這類的問題怎麼解，像是我們會有 <code>dump=False</code> 這種參數存在</li>
+</ul>
+</li>
+</ul>
+<h1 id="Chat-4-Comments"><a href="#Chat-4-Comments" class="headerlink" title="Chat 4. Comments"></a>Chat 4. Comments</h1><blockquote>
+<p>The proper use of comments is to compensate for our failure to express ourself in code</p>
+</blockquote>
+<ul>
+<li>最好的話基本上是不要 comment，這表示你的 code 本身已經表達得夠清楚了<ul>
+<li>所以需要在意的是自己程式的表達能力</li>
+<li>有 comment 的話表示你的 code 改動是需要考慮 comment 的，但是 comment 本身並沒有辦法被 unittest，於是就容易被遺漏</li>
+</ul>
+</li>
+<li>沒有用到的 code 不要 comment，而是直接刪掉，因為我們現在有 git XD<ul>
+<li>其實我們系統裡常常有類似的程式，可以來討論一下要不要留下這些東西</li>
+</ul>
+</li>
+<li>書裡有提到有些 function 開頭會寫的註解是在講 function 的 argument 跟 result，他本身是反對的。但在 python 裡個人是覺得有那些東西蠻好的，也可以幫妳生成一些文件等等的東西之類的， google 本身對這件事情做得蠻徹底的但我目前除了那邊之外並沒有看本身過類似規格的地方。</li>
+<li>適當控制</li>
+</ul>
+<h1 id="Chap-5-Formatting"><a href="#Chap-5-Formatting" class="headerlink" title="Chap 5. Formatting"></a>Chap 5. Formatting</h1><ul>
+<li>好的排版很重要，可以幫助閱讀。<ul>
+<li>慶幸的是 python 就有做好這件事 XD</li>
+<li>現在也有像 black 一樣的 formatter 來幫助我們做這些事</li>
+</ul>
+</li>
+<li>裡面提到一點很有趣，他說的事情是有關係的 function 離得越近越好 (比較好查找)</li>
+<li>排版的原則可以像報紙一樣，從標題開始敘事，然後是一個 top down 的架構<ul>
+<li>在 class 裡， public method 擺上面，private method 擺下面</li>
+<li>class 第一層 call 的進入點擺在最上面，第二層次之…</li>
+</ul>
+</li>
+<li>每個 team 找到自己共識覺得不錯的排版很重要</li>
+</ul>
+<p>更深入關於寫程式的一些眉角</p>
+<p>在記錄第六章之前，我記得有一個地方是他說少用 global variable (我記得蠻多地方有提到這個觀念，我不確定有沒有)。會需要注意這件事其實是我注意到 dice 裡面有很多這種 case:</p>
+<ul>
+<li>base.py 裡面的 BIGQUERY_CLIENT 之類的東西等等的</li>
+<li>我們會用 nested function，這帶給我們一些方便但也帶來壞處</li>
+</ul>
+<p>這些便利的過程帶來壞處可以分成:</p>
+<ul>
+<li>很難做 unittest，因為你 unittest 會跟環境綁在一起</li>
+<li>很難 refactor，因為也跟你的 global variable 綁在一起，如果要改就變成我們系統裡面會有很多跟 global variable 綁在一起的行為。</li>
+</ul>
+<h1 id="Chat-6-Objects-and-Data-Structures"><a href="#Chat-6-Objects-and-Data-Structures" class="headerlink" title="Chat 6. Objects and Data Structures"></a>Chat 6. Objects and Data Structures</h1><ul>
+<li>object 有行為，data structure 只是承載資料的容器</li>
+<li>這章我覺得比較 java 一點</li>
+</ul>
+<h1 id="Chap-7-Error-Handling"><a href="#Chap-7-Error-Handling" class="headerlink" title="Chap 7. Error Handling"></a>Chap 7. Error Handling</h1><ul>
+<li>exception vs return code<ul>
+<li>他推崇 exception，不過我覺得這是語言設計的大戰各有優缺點，個人覺得跟應用場景有關</li>
+<li>應該有很多戰文，軟體工程師版感覺也可以來一篇</li>
+<li><a href="https://softwareengineering.stackexchange.com/questions/166039/why-are-exceptions-considered-better-than-explicit-error-testing" target="_blank" rel="noopener">https://softwareengineering.stackexchange.com/questions/166039/why-are-exceptions-considered-better-than-explicit-error-testing</a></li>
+</ul>
+</li>
+<li>我自己個人是認為好好使用 exception 很重要，其實我們應該要處理我們知道的 exception ，不知道的就讓他直接丟出系統外。最危險的就是不管三七二十一都直接加個 try-catch</li>
+<li>有餘力的話可以 define 自己的 exception</li>
+<li>書裡提到不要傳 None 或 return None，這個我還在想，不傳 None 我覺得可能蠻直觀的</li>
+</ul>
+<p>第八章之後我就覺得比較見仁見智，不是這麼 general 的 guide。比較是基於前面所說的東西繼續延伸，像是怎麽做好的 unittest, 怎麼寫好的 class ，我就挑著寫。後面的章節我都覺得比較適合看一些專門的書來探討，這邊寫得並不夠深刻。</p>
+<h1 id="Chap-9-Unittests"><a href="#Chap-9-Unittests" class="headerlink" title="Chap 9. Unittests"></a>Chap 9. Unittests</h1><p>裡面提到一個 unittests 的原則叫 F.I.R.S.T 我覺得可以考量一下</p>
+<ul>
+<li>Fast: tests should be fast</li>
+<li>Independent: tests should not depend on each other.</li>
+<li>Repeatable: Tests should be repeatable in any environment.</li>
+<li>Self-Validating: Tests should have a boolean output</li>
+<li>Timely: Tests need to be written in a timely fashion.</li>
+</ul>
+<h1 id="Chap-10-Classes"><a href="#Chap-10-Classes" class="headerlink" title="Chap 10. Classes"></a>Chap 10. Classes</h1><ul>
+<li>Classes should be small<ul>
+<li>我第一直覺是想到 dice.py XD</li>
+<li>也有 class 版本的 single responsibility principle</li>
+<li>基本上就是寫的時候要把物件的行為定義好，怎麼定義好物件要去看一下物件導向程式設計。跟大家討論也是一個很好的方法～ (杰翰 refactor dice 的思維其實抽得不錯)</li>
+</ul>
+</li>
+<li>如何定義好的抽象化介面其實是一個長期的修煉。</li>
+</ul>
+<p>參雜一點我自己做東西的一些想法，大家可以一起討論一下覺得怎麼樣</p>
+<h1 id="關於做系統這件事"><a href="#關於做系統這件事" class="headerlink" title="關於做系統這件事"></a>關於做系統這件事</h1><ul>
+<li>我覺得抽象層的劃分其實是很重要的，有明確的抽象層，你的程式才有辦法有明確的目標，一步一步細分下去其實就會落實到 function level。所以畫架構的能力我覺得在越往上走的時候其實是越重要的，除了讓 code 本身是個有結構的東西之外也可以比較容易跟其他人溝通。</li>
+<li>架構畫出來之後，其實需要考慮的有幾個點<ul>
+<li>各個 component 之間溝通的介面，需要傳遞的參數有哪些。</li>
+<li>每一層的實作方式怎麼樣，通常系統本身不會是一個單機程式，所以我們必須思考溝通的媒介要是什麼。</li>
+<li>個人覺得 ML 的 product 其實很多都還在發展中 (因為演算法各個時代都有點不同)，所以更挑戰大家對架構的敏銳度。目前沒有像 web 有這麼成熟的 framework 可以照著寫，蠻多都需要靠大家自己摸索。</li>
+</ul>
+</li>
+<li>在改動的時候隨著系統長大，需要考慮的也會越來越多，這就挑戰一個人對系統的掌握度以及細心度。做一個改動的時候其實是需要思考到各個環節，這個時候心中有沒有那麼架構圖其實算是算是至關重要</li>
+<li>有 code review 其實讓我覺得在做產品的時候更有信心一點。不管是哪個層級或是多天才的 engineer，在思考的時候都必定有盲點，而 code review 就是減少這種盲點出現的機率。白話一點就是個人比較相信集體智慧而不太相信單一個個體的智慧 XD。</li>
+</ul>
+<h1 id="關於工程師成長這件事"><a href="#關於工程師成長這件事" class="headerlink" title="關於工程師成長這件事"></a>關於工程師成長這件事</h1><p>這個可能就是我自己的碎碎念</p>
+<ul>
+<li>我一直都覺得工程做得好，做 ML 的產品才能長期成功。原因是因為看過一些產品把兩者切的很開，導致 scientist 那端做出來的東西其實很難 maintain 跟延續發展的。接手的人其實也會覺得非常痛苦，這對一個團隊長期來說並不是一件好事。如果想要繼續推薦 project 的話個人覺得 codebase 是需要照顧的。</li>
+<li>個人鍛鍊思考深度的方法是順著現在在做的問題，提出接下來的問題，然後再嘗試想解法。一直這樣的循環，初期時的時候蠻累的，但習慣之後就還可以。比較明顯的差別是以前在聽 conference 或是聽演講的時候都不太確定自己的問題能不能切中要點，現在感覺問出來的問題的質感比較高一點XD (自己說XD)。</li>
+<li>在面試 (不管是面人或去面的時候) 也保持類似的敏銳度我覺得也會挺好的。</li>
+</ul>
+<h1 id="延伸閱讀-Python-Clean-Code"><a href="#延伸閱讀-Python-Clean-Code" class="headerlink" title="延伸閱讀: Python Clean Code"></a>延伸閱讀: Python Clean Code</h1><p><a href="https://github.com/zedr/clean-code-python" target="_blank" rel="noopener">https://github.com/zedr/clean-code-python</a></p>
+<p><a href="https://docs.python-guide.org/writing/style/" target="_blank" rel="noopener">https://docs.python-guide.org/writing/style/</a></p>
+]]></content>
+      <tags>
+        <tag>clean-code</tag>
+        <tag>programming</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Machine Learning Practical - Stacking Ensemble 小整理</title>
+    <url>/2020/03/29/machine-learning-practical-stacking-ensemble-%E5%B0%8F%E6%95%B4%E7%90%86/</url>
+    <content><![CDATA[<p>最近在工作的時候小K了一些 stacking ensemsble 的技巧, 感覺整理一下整個思路大概是怎麼樣好像是一個不錯的選擇</p>
+<h1 id="Ensemble-Learning-簡介"><a href="#Ensemble-Learning-簡介" class="headerlink" title="Ensemble Learning 簡介"></a>Ensemble Learning 簡介</h1><p>基本上用一句話來形容就是: “3個臭皮匠勝過一個諸葛亮”. 原因對每個模型來說你可以把它當成是一個人對某件事物的看法, 舉例來說: 一個人看一份履歷決定要不要面試他, 就算是這個人非常厲害好了, 還是有可能會有 bias (像是 frontend 的人可能不一定對 backend 的好壞有特別的感覺). ensemble learning 想解決的就是類似的事情, 透過訓練多個模型(人)從某些方式綜合起來的去下一個最終的結論. 通常這種方式得到的模型會比較穩定而且具有全局觀.<br>而主要在做 nsemble learning 的方式可以分成下面三種:</p>
+<ul>
+<li>Bagging</li>
+<li>Boosting</li>
+<li>Stacking<br>Bagging 跟 Boosting 在 scikit learn 的 ensemble method (<a href="https://scikit-learn.org/stable/modules/ensemble.html)裡面其實都有還不錯的介紹" target="_blank" rel="noopener">https://scikit-learn.org/stable/modules/ensemble.html)裡面其實都有還不錯的介紹</a>, 所以在這裡比較想要筆記的是 stacking ensemble 這個方法的思維.</li>
+</ul>
+<h1 id="Stacking-Ensemble-是什麼"><a href="#Stacking-Ensemble-是什麼" class="headerlink" title="Stacking Ensemble 是什麼"></a>Stacking Ensemble 是什麼</h1><p>基本上, stacking ensemble的方法就是訓練各種不同的 model, 然後會有第二層的人去綜合前面model的觀點得到一個新的結果.<br>在Kaggle大神的演化裡面, 到最後他提出了stacknet, 一個類似 NN 的 stacking ensemble framework 。在說 stacking method 可以做到一個很極致的境界, 就是各種 stacking 的 layer 最後形成一個 network 的感覺. 簡單來說就是一層 stacking 不夠的話, 你可以有第二層 第三層 …. 到第 N 層</p>
+<h1 id="Ways-to-Do-Stacking-Ensemble"><a href="#Ways-to-Do-Stacking-Ensemble" class="headerlink" title="Ways to Do Stacking Ensemble"></a>Ways to Do Stacking Ensemble</h1><h2 id="Algorithm-Stacking"><a href="#Algorithm-Stacking" class="headerlink" title="Algorithm Stacking"></a>Algorithm Stacking</h2><p>以不同的 model 訓練後作為 feature, 當作第二層 model 的 feature 跟原本的 feature 參雜在一起. 在這樣的思維下就是用不同人的觀點綜合之後可以得到一個比較沒有偏見的答案所得出的結果。</p>
+<h2 id="Features-Stacking"><a href="#Features-Stacking" class="headerlink" title="Features Stacking"></a>Features Stacking</h2><p>切分不同的 feature subset 訓練後當作 feature, 當作之後 model learning 的 feature 做不同的 weak learner，之後再組合起來一起學習。</p>
+<h2 id="Dataset-Stacking"><a href="#Dataset-Stacking" class="headerlink" title="Dataset Stacking"></a>Dataset Stacking</h2><p>切分不同的 dataset 訓練後當作不同層的 training set. 這個思維跟 bagging ensemble 不一樣的點是說, bagging 想做到的事情是用同樣的 classifier 去訓練不同子集合的 dataset, 想避免的事情是某個演算法過度 optimize 當前訓練集的結果. 而在 stacking 裡面的做法其實是在第一層的 weak learner 的時候都用同一個 subset ,得到的結果去用在第二層的 model 裡面當作feature predictor, 再用另一個subset來做第二層leaner的訓練集。</p>
+<h1 id="Conclusion"><a href="#Conclusion" class="headerlink" title="Conclusion"></a>Conclusion</h1><p>把上面的三個方式做各種組合轉換之後 stacking 應該會有不錯的效果, 但是其實在實作上會遇到蠻多關於怎麼好好切 dataset 的細節的. 如果有比較有力氣再來整理一些實作上的東西.<br>這個大概是最近在唸 stacking 相關的資料的一些整理, 目前遇到的問題比較多是在 tuning 的時候覺得很難得到好結果 但確實在模型的訓練上變得簡單了. 還有很多需要鑽研努力的地方呢…</p>
+<h1 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h1><ul>
+<li><a href="https://medium.com/@drumrick/stacking-ensembling-%E7%9B%B8%E9%97%9C%E6%96%87%E7%AB%A0%E6%8E%A8%E8%96%A6-bc35df0cb2b2" target="_blank" rel="noopener">https://medium.com/@drumrick/stacking-ensembling-%E7%9B%B8%E9%97%9C%E6%96%87%E7%AB%A0%E6%8E%A8%E8%96%A6-bc35df0cb2b2</a></li>
+<li><a href="https://scikit-learn.org/stable/modules/ensemble.html#id19" target="_blank" rel="noopener">https://scikit-learn.org/stable/modules/ensemble.html#id19</a></li>
+</ul>
+]]></content>
+      <tags>
+        <tag>machine-learning</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>資料科學架構雜記(II) — 淺談資料處理的重要性</title>
+    <url>/2020/03/29/%E8%B3%87%E6%96%99%E7%A7%91%E5%AD%B8%E6%9E%B6%E6%A7%8B%E9%9B%9C%E8%A8%98-II/</url>
+    <content><![CDATA[<p>這個主題是在今天坐公車的時候想到的, 所以想說回家趁晚上的時候趕快把它整理整理寫出來XDD 比較主要的目的可能是想要聊聊好好做資料處理對機器學習專案/分析專案的重要性吧</p>
+<h1 id="為什麼想要寫這個"><a href="#為什麼想要寫這個" class="headerlink" title="為什麼想要寫這個"></a>為什麼想要寫這個</h1><p>工作到現在也有累積一些經驗, 現實中的生活常常會發現不是像做學術或是想像中的美好XDD. 經手過一些專案或是跟一些其他公司的人, 或是接案的人在聊, 其實常常發現在最基礎的基礎 — 能夠好好做學習或分析的資料其實都沒有辦法很好的得到 (白話一點就是: $@#$@#資料這麼多問題叫我做個雕), 但其實在需要做好這些基礎工程的時間基本上project的時程差不多或是更久. 而且做一個”好的”資料處理大部分不是會對公司或是距離細節比較遙遠的人能夠理解的事情, 在討論schedule或是發表完成報告的時候常常會覺得說服力相對以feature(像是ML專案的結果)弱很多, 所以想嘗試看看能不能寫出好好做資料處理的優點跟投資在這個上面可以得到怎麼樣的結果.</p>
+<h2 id="聊聊Kaggle的資料"><a href="#聊聊Kaggle的資料" class="headerlink" title="聊聊Kaggle的資料"></a>聊聊Kaggle的資料</h2><p>不管在Kaggle或是學術上, 大部分的資料集其實都做過一定的整理, 所以很多工程上的事情相對來說問題不大, 留下來的會需要處理的部份大部分都是在做feature變換當中需要在意的部分, 舉例來說像是要怎麼處理missing values或是說feature之間要不要做standardize / normalization…<br>所以在做kaggle的題目的時候其實我們可以專注或是很快的進入狀況, 但是到了現實世界之後世界可能就不一樣了. 現實生活中其實常常會有各種意想不到關於資料本身的問題XD, 發現的問題通常是類似下面的問題其中之一:<br>“欸幹為什麼有些人的住址郵遞區號是放在額外的欄位的, 有些人是放在 plaintext的欄位裡面?”<br>“怎麼好像我要的資料在某個時間點之後就不見了XDDDD?” (原來是在某時間之後被移到另一個地方去了)<br>“之前好像有一陣子系統壞掉, 那個時期的label不是很正確QQ”<br>“商品種類怎麼用__product_type: xxx的格式存在plaintext裡面@@”<br>…還有各種千奇百怪的問題XD<br>所以其實在分析專案或是ML專案進入研究跟探索的狀態之前, 去解決這些關於資料上的問題都是為了讓這個專案可以好好研究跟探索.</p>
+<h1 id="簡介資料處理的細節"><a href="#簡介資料處理的細節" class="headerlink" title="簡介資料處理的細節"></a>簡介資料處理的細節</h1><p>這個部分比較想要強調的是關於資料處理本身, 在工程面像是架構本身的東西就不再探討的範圍裡面. 所謂好用的資料, 以目前到現在的經驗, 可以得到幾個等級上的好資料</p>
+<h3 id="Leve-1-正確的資料"><a href="#Leve-1-正確的資料" class="headerlink" title="Leve 1. 正確的資料"></a>Leve 1. 正確的資料</h3><p>這邊指的正確資料主要講的是我們採集到的每一筆資料本身裡面填得值都是正確的. 舉例來說, 上面提到的郵遞區號的問題就應該在做專案的時候可以在資料裡面有一個欄位直接可以拉到.</p>
+<h3 id="Level-2-正確的資料關係"><a href="#Level-2-正確的資料關係" class="headerlink" title="Level 2. 正確的資料關係"></a>Level 2. 正確的資料關係</h3><p>假若A表跟B表有關係, 如果A表裡面的a跟B表裡面的b有關係, 這個關係必須要是正確的. 以上面提到的<br>“怎麼好像我要的資料在某個時間點之後就不見了XDDDD?” (原來是在某時間之後被移到另一個地方去了)<br>這個問題來說, 比較好的作法會是有一個表把移動之前跟移動之後的資料整合在一起.</p>
+<h3 id="Level-3-好用的格式"><a href="#Level-3-好用的格式" class="headerlink" title="Level 3. 好用的格式"></a>Level 3. 好用的格式</h3><p>以現在拉資料要寫SQL來說, 基本上會發現有時候會去存json field, 或是會以一些固定的pattern存在純文字的欄位裡面, 像是上面說的<br>“商品種類怎麼用__product_type: xxx的格式存在plaintext裡面@@”<br>以json格式來說, 現在蠻多database都有支援json query所以寫起來其實還好, 但是不好的事情是因為他不是一個可以直接被查到的schema, 所以在使用上如果今天不知道某個欄位放在json裡的話會花一些時間去尋找某個資料在哪裡.<br>而用某種固定格式放在純文字欄位裡的話, 可以想像的事情是需要寫parser把他處理好. 這種effort相對來說就會比較大.<br>比較理想的狀態是在做專案之前就可以把這些明確有意義的且有可能被用到的東西先拆出來存.</p>
+<h3 id="Level-4-好用的分析-應用表"><a href="#Level-4-好用的分析-應用表" class="headerlink" title="Level 4. 好用的分析 / 應用表"></a>Level 4. 好用的分析 / 應用表</h3><p>這個可能是一個很理想的狀態, 可以想像是說, 今天我要用什麼資料只要用一次select就可以單純地拿到. 一個表就代表一個分析的主體(e.g., user, 商品, category, …), 需要在意的只是我要拿user和商品一起考量要怎麼做以及這兩個東西一起考慮的話我們要計算的是怎麼樣的metrics等等之類的問題. 為了達到這件事其實是需要花很大量的工的, 必須要討論分析上常用的情境是什麼, 怎麼樣才不會overdesign 等等的. 算是蠻吃經驗的一項工作. 但如果做得好的話其實全公司都會感謝你XD (默默想到以前在yahoo做這一塊的大前輩們… XD)</p>
+<h2 id="以分析的角度來看資料處理的重要性"><a href="#以分析的角度來看資料處理的重要性" class="headerlink" title="以分析的角度來看資料處理的重要性"></a>以分析的角度來看資料處理的重要性</h2><p>以分析上來說其實最害怕是沒有記錄到該紀錄的資料或是資料之間的關聯性並不強 / 很難整理等等的. 像是某個時間點紀錄上資料有問題之類的事情, 會導致那段時間的資料不可信任或是根本沒辦法看, 但以資料分析來說, 沒有資料何來分析呢?<br>那如果資料對了, 但是很難整理的話, 要產生一個有insight的report對分析師來說也是effort超大的. 這時候如果有Level 4等級的資料, 其實是可以大大增加分析師的工作效率的.</p>
+<h2 id="以演算法的角度看資料處理的重要性"><a href="#以演算法的角度看資料處理的重要性" class="headerlink" title="以演算法的角度看資料處理的重要性"></a>以演算法的角度看資料處理的重要性</h2><p>而從機器學習演算法本身來看, 其實太多錯誤的資料會造成演算法本身的偏差. 舉例以推薦系統經典應用的演算法Matrix Factorization來說, 雖然他可以去預測user對某個item的好感度即使在矩陣中這個值是空的, 但其實當今天資料點越多的時候其實準確度本身是會上升的, 假設因為一些資料處理的誤差導致很多資料是不能用的或是更誇張的記錯user喜歡的item, 那可以想像的是model的performance必定會下降. 最嚴重是會導致完全無法學習的狀況. 把這樣的想像往其他做法推其實也一樣, 有些演算法說是可以照顧到空值, 但其實可以想像的事情是機器跟人一樣, 看得到越完整的東西所做出來的決定越不會有太大的落差.</p>
+<h1 id="資料處理應該歸屬在哪個範疇"><a href="#資料處理應該歸屬在哪個範疇" class="headerlink" title="資料處理應該歸屬在哪個範疇"></a>資料處理應該歸屬在哪個範疇</h1><p>其實常常看PTT在討論的時候會說台灣的data scientist需要會engineering也要會engineering的東西也要會science的東西, 一個人當多個人用. 某個程度上好像不是很能否認這一點. 但其實撇開架構端, 以上述聊到實際的商業資料處理本身來說, 我認為事情是這樣的:</p>
+<h2 id="寫Code層面"><a href="#寫Code層面" class="headerlink" title="寫Code層面"></a>寫Code層面</h2><p>這個部分我認為不管是scientist寫或是engineering寫都沒關係, 主要重要的事情會是處理的邏輯正不正確跟工程上的quality好不好, 所以不管是誰寫另外一個角色的人都需要去review對方的作品(science review處理邏輯, engineer review工程上的細節). 這樣才能達到一個比較平衡的境界</p>
+<h2 id="制定schema"><a href="#制定schema" class="headerlink" title="制定schema"></a>制定schema</h2><p>另外更重要的事情是關於怎麼訂schema, 在做這類的事情的時候其實非常需要各方面的feedback, 告訴做的人在商業上重視的是什麼樣的數字, 讓他們去規劃怎麼樣使用. 某個程度上其實跟product的開發有異曲同工之妙啊~<br>這邊想提到的一點是這類schema的制定跟backend在開發的時候制定的規則不太一樣, 有興趣的人可以去看看OLTP跟OLAP的schema怎麼設計. 這邊就不再贅述了 =)</p>
+<h1 id="小結"><a href="#小結" class="headerlink" title="小結"></a>小結</h1><p>之前在聽talk的時候常常有人說 “Data的project常常需要花80%的時間去做data wrangling”, 這句話其實並不假. 但是如果在做一些warehousing或是data product的時候能夠先把這類的mindset考慮進去的話, 我想是有機會把80%再縮短一點的XD, 或是其他專案可以reuse這個的結果是可以增加分析或是學習專案做探索的效率很多的.<br>寫完的感想<br>其實要把這類的事情寫清楚還是覺得複雜度很高, 尤其這個主題又好像大家都知道但很少人寫 在寫的時候其實要釐清很多事情XD(像是問題通常是哪一類型, 應該要怎麼寫等等的). 在寫紀錄的路上繼續努力QQ</p>
+]]></content>
+      <tags>
+        <tag>machine-learning</tag>
+        <tag>data</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>資料科學架構雜記(I) — Why Python for Data Architecture</title>
+    <url>/2020/03/29/%E8%B3%87%E6%96%99%E7%A7%91%E5%AD%B8%E6%9E%B6%E6%A7%8B%E9%9B%9C%E8%A8%98-I/</url>
+    <content><![CDATA[<p>換新工作已經一段時間, 想整理一下一些在這裡建立 data archiecture 的一些問題. 我目前的工作主要負責的東西大部分是處理跟資料有關的問題, 剛來的時候最基礎的一個問題就是要決定架構的大方向跟”要用什麼語言 implement ”. 一般來說講到關於資料處理的語言頗多, 例如R, Java, Scala, Python … 等等. 但是我們比較貪心一點, 想要找到一種大部分可以通吃的語言來當作我們的基礎(當然通吃也有一些 tradeoff 要取捨), 下面列出當時在規劃的時候主要在思考的幾個問題</p>
+<h2 id="需要架構的服務"><a href="#需要架構的服務" class="headerlink" title="需要架構的服務"></a>需要架構的服務</h2><ul>
+<li>ETL Workflow System</li>
+<li>Data Processing</li>
+<li>Machine Learning Model Training</li>
+<li>Data Analysis</li>
+<li>API Serving</li>
+</ul>
+<h2 id="工程上的考量"><a href="#工程上的考量" class="headerlink" title="工程上的考量"></a>工程上的考量</h2><h3 id="簡單一致的tech-stack"><a href="#簡單一致的tech-stack" class="headerlink" title="簡單一致的tech stack"></a>簡單一致的tech stack</h3><ul>
+<li>減少開發上需要維護的環境, 舉例來說: 同時存在 python 跟 scala 兩種 language, dependency control 可能會需要有兩套 (pip for python and sbt for scala)</li>
+<li>在目前來說還沒有需要遇到同時存在兩種以上語言來做事的情境出現 (通常感覺問題會遇到是在超大資料或是 API layer 的response time 很要求的狀況下, 會考慮採用 java / scala 來加速程式)<h3 id="快速開發-但需要維持一定的品質"><a href="#快速開發-但需要維持一定的品質" class="headerlink" title="快速開發, 但需要維持一定的品質"></a>快速開發, 但需要維持一定的品質</h3>在這邊時常會遇到一個問題: 我們應該要自己架構 open source 服務或者是用現存有人做好的服務來用. 其實常常都是一個來來回回幾次的討論, 不停地嘗試比較來做一個決定, 但後來有一些 pattern 可以遵循:</li>
+</ul>
+<ul>
+<li><p><strong>Deliver 的速度與開發品質的 Tradeoff</strong><br>因為我們是 startup, 所以 deliver 的速度是重要考量因子(但不是唯一), 如果現存有人已經有不錯的 solution (不一定 100% fit 你的需求, 但有 80% 左右), 那就先用, 以整個系統建置速度為一個重要的考量點. 當然, 也需要考慮之後要轉換成自己做的 effort 跟整個架構的彈性程度.</p>
+</li>
+<li><p><strong>選擇現存的 solution 的好壞</strong></p>
+<ul>
+<li>好處: 不需要處理 operation 的部分, 有問題的時候 forward 給他們(通常一些小 service 的處理速度都很快)</li>
+<li>壞處: 會比較花錢, 但這個有點算是一個 tradeoff, 省時費 $$, 省 $$ 費時, 主要可能要看 budget 的承受程度, 來決定要不要使用一個服務或是自己做.<h3 id="Machine-Learning-Model-好整合"><a href="#Machine-Learning-Model-好整合" class="headerlink" title="Machine Learning Model 好整合"></a>Machine Learning Model 好整合</h3>ML model 整合有幾個形式, 其中會有一個 model file, 讓 service (例如web API) 讀進去之後做一些 predict 的事情, 所以會牽扯到在訓練完 model 之後必須輸出到 model file 或是在程式裡面讀取算好的 model 出來用的過程(詳細的一些介紹可以參考這裏 <a href="https://www.slideshare.net/VilluRuusmann/on-the-representation-and-reuse-of-machine-learning-ml-models" target="_blank" rel="noopener">https://www.slideshare.net/VilluRuusmann/on-the-representation-and-reuse-of-machine-learning-ml-models</a>).</li>
+</ul>
+</li>
+</ul>
+<h2 id="SQL"><a href="#SQL" class="headerlink" title="SQL"></a>SQL</h2><p>在資料處理中, 與 database 或是 data warehouse 做抽取或是一些 ORM model 的底層都是實作一些 SQL 的介面, 擁有一個好的 programming 介面來處理資料會是一個大利多. 其實每個語言都有實作自己個 SQL interface, 所以這端的差異不大.</p>
+<hr>
+<h1 id="Why-Python"><a href="#Why-Python" class="headerlink" title="Why Python?"></a>Why Python?</h1><p>在思考了上述的問題之後, 後來我們選擇了 python, 主要選擇的脈絡大概是這樣想</p>
+<ol>
+<li>python machine learning 的 model 整合度比較簡單<ul>
+<li>這個部分在開源界裡面, 機器學習的套件發展的比較廣為人知, 這個部分的處理支援也相對高.</li>
+<li>不管是小規模的 ML model(scikit learn or keras) 或是大規模的 ML model(Spark, Google Cloud ML + Tensorflow), 都有 python programming interface.</li>
+</ul>
+</li>
+<li>Data Processing<br>在資料處理方面, 不管是大資料的處理(可以用 Spark or Google Cloud Dataflow)或是小規模的處理(可以用 pandas), python 都有不錯的支援度. 至於為什麼會需要處理兩種規模的資料呢, 原因是因為我們還在養一些資料, 所以一開始感覺還不用使用牛刀來殺雞. 可以先從單機處理開始.</li>
+<li>在 data science / engineering 的 community support 也比較足夠:<br>並不是說其他的語言 support 不夠, 而是在各個面向上來說(data processing / ML / ETL / workflow system), python平均的水準都很高.</li>
+<li>基於以上幾點加上我們希望在初期可以先維持系統生態的多樣性不要太高, 所以在決定基礎語言的時候就選擇使用了 python.</li>
+</ol>
+<hr>
+<h1 id="Service-Open-Source-Project選擇"><a href="#Service-Open-Source-Project選擇" class="headerlink" title="Service / Open Source Project選擇"></a>Service / Open Source Project選擇</h1><p>在這個 section 主要想簡單記錄一下我們選擇的 service / framework, 至於選擇的比較心得或是踩雷細節可能會再嘗試寫寫看XD</p>
+<h2 id="ETL"><a href="#ETL" class="headerlink" title="ETL"></a>ETL</h2><p>初期最重要的部分大概就是要建置 data warehouse, 在初期的目標都是先以 SLA 比較長的 analytics data 為準, 所以 batch 的 ETL 就相對重要許多. 在這一端, 可以分成兩個部分:</p>
+<ul>
+<li>Workflow Scheduler: <a href="https://airflow.apache.org/" target="_blank" rel="noopener">Apache Airflow</a>, 不過用了一陣子之後發現有一些雷…</li>
+<li>Data Processing Framework: local from Airflow worker (small data) + Google DataFlow (large or streaming data)</li>
+</ul>
+<h2 id="Machine-Learning"><a href="#Machine-Learning" class="headerlink" title="Machine Learning"></a>Machine Learning</h2><p>在這一塊不論資料大小, 都有適合的東西可以用, 也都可以很簡單的 integrate into system.</p>
+<ul>
+<li>單機訓練: Scikit Learn / Keras for deep learning</li>
+<li>分散式訓練: Spark / Sparkit Learn / Google Cloud ML</li>
+</ul>
+<h2 id="Data-Warehousing"><a href="#Data-Warehousing" class="headerlink" title="Data Warehousing"></a>Data Warehousing</h2><p>這個部分, 當初的討論是覺得還不需要自己建構龐大的生態系(從儲存架構(HDFS)開始架之類的), 所以有 survey 一些 service, 像是 Google BigQuery / AWS Redshift / Snowflake. 後來我們採用的是 BigQuery, 主要原因是 community 看起來不小, 然後是以量計費, 對於採用漸進式思維開發的我們來說其實是很適合的.<br>然後有趣的事情是, pandas 也有支援從 BigQuery 讀取成 dataframe 的功能, 所以在一些基礎開發上也可以很簡單的整合..</p>
+<h2 id="Data-Analysis"><a href="#Data-Analysis" class="headerlink" title="Data Analysis"></a>Data Analysis</h2><p>For non Engineer members<br>通常是做一些簡單的資料拉取跟視覺化, 發現進來的時候其實這塊做的已經很不錯!<br>所以我在這邊做的事情除了把資料灌到 data warehouse 去 serve 一些比較算不完的 query 之外就是幫助他們做一些比較困難直接用 SQL 達成的分析</p>
+<p>以我們一般使用情境上來看</p>
+<ul>
+<li>Lanuage: SQL, 這個好像毋庸置疑, SQL 現在就是拉資料 + 分析的一個標準語言</li>
+<li>Open Source: Metabase ← 必須說 metabase 是神器, 可以連接很多個不同種類的資料庫(for example: PostgreSQL 跟 BigQuery)的同時也可以做一些視覺化. 所以如果一些常常需要看數據的人(marketing / sales)會寫一些 SQL 的話, 就可以自己做到很多事情.</li>
+</ul>
+<p>For Engineer / Scientist / Analyst</p>
+<ul>
+<li>For 更進階或複雜的資料分析問題</li>
+<li>Python(pandas for data processing + matplotlib / seaborn for visualizaiton) + SQL</li>
+</ul>
+<h2 id="API-Layer"><a href="#API-Layer" class="headerlink" title="API Layer"></a>API Layer</h2><p>這裡就比較單純回到有點像 web 開發的情境了, 在可以 model loading 的方式下, 討論上是想找一個 community support 不錯, 但是又沒有像 Django 限制那麼重的套件. 於是我們選擇了 Flask.</p>
+<hr>
+<h1 id="小結"><a href="#小結" class="headerlink" title="小結"></a>小結</h1><p>除了以上的點, 其實在架構整個系統的每個過程中也各自會遇到不同的問題 (for example: CI/CD 怎麼做比較好, model 開發的時候 deploy 的問題), 有機會也想再寫一篇來討論討論.</p>
+<p>寫這篇的目的其實比較傾向於嘗試提出一些思考點而不是絕對值或是教學說什麼東西怎麼用(主要是感覺這類的記事文章比較少所以想嘗試紀錄看看 XD). 如果有覺得不夠好的地方再請閱讀的大大們不吝指教一下~</p>
+]]></content>
+      <tags>
+        <tag>machine-learning</tag>
+        <tag>data</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Deploy Private Github Python Packages on Heroku without Exposing Credentials</title>
+    <url>/2020/03/29/deploy-private-github-python-packages-on-heroku-without-exposing-credentials/</url>
+    <content><![CDATA[<p>Recently, we met a deployment problem in heroku python environment.</p>
+<p>In heroku python deployment, it will execute <code>pip install requirements.txt</code> and install packages in the file. But when you have a private package, everything goes complicated.</p>
+<h2 id="Goal"><a href="#Goal" class="headerlink" title="Goal"></a>Goal</h2><p>What we want to do is to install our private package which is on the github. Just making one of the following commands success:</p>
+<ul>
+<li><code>pip install git+https://github.com/my_account/myrepo.git</code></li>
+<li><code>pip install git+ssh://github.com/my_account/myrepo.git</code></li>
+<li><code>pip install git+https://{username}:{password}@github.com/my_account/myrepo.git</code></li>
+</ul>
+<p>The complicated thing here is that you don’t want to commit any credential or password in git because it causes to many security issues. So how to let heroku know the credential in build is the key-point of this problem.</p>
+<h2 id="Third-Party-Buildpack-Solutions"><a href="#Third-Party-Buildpack-Solutions" class="headerlink" title="Third-Party Buildpack Solutions"></a>Third-Party Buildpack Solutions</h2><p>In fact, there are some third-party buildpacks supporting setting github tokens or ssh-keys in the environments:</p>
+<ul>
+<li><a href="https://elements.heroku.com/buildpacks/heroku/heroku-buildpack-github-netrc" target="_blank" rel="noopener">heroku-buildpack-github-netrc</a></li>
+<li><a href="https://elements.heroku.com/buildpacks/debitoor/ssh-private-key-buildpack" target="_blank" rel="noopener">ssh-private-key-buildpack</a></li>
+</ul>
+<p>But after our discussion, we decide not to use third-party buildpacks because the following reasons</p>
+<ul>
+<li>maintenance: everyone who joins related projects needs to know the buildpack and maintain them if anything changes.</li>
+<li>security: we don’t know what things happen if we do not review the code.</li>
+</ul>
+<p>(I’ve reviewed the code, both of them are pretty simple and pretty useful. You can config your credentials in environment variables and the buildpacks will set for your purpose.)</p>
+<h2 id="Solution-without-Using-Third-Party-Buildpacks"><a href="#Solution-without-Using-Third-Party-Buildpacks" class="headerlink" title="Solution without Using Third-Party Buildpacks"></a>Solution without Using Third-Party Buildpacks</h2><p>With some survey on the heroku buildpacks, we found a good solution that helps us solve this problem. To learn the solution, we need to know more about how heroku python buildpack works first. Herkuo python buildpack will execute the following commands in order:</p>
+<ol>
+<li><code>bin/detect</code></li>
+<li><code>bin/pre_compile</code></li>
+<li><code>bin/compile</code>: in this step, it will execute <code>pip install -r requirments.txt</code> here.</li>
+<li><code>bin/post_compile</code></li>
+<li><code>bin/release</code></li>
+</ol>
+<p>With the knowledge, we tried the steps:</p>
+<ol>
+<li>Setup environment variables <code>GITHUB_USER</code> and <code>GITHUB_PASSWORD</code></li>
+<li>Put the file <code>bin/pre_compile</code> with link generation code like:</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># !/bin/bash</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> <span class="string">"Generate myrepo to requirements.txt"</span></span><br><span class="line">MY_REPO_GIT=<span class="string">"git+https://<span class="variable">$&#123;GITHUB_USER&#125;</span>:<span class="variable">$&#123;GITHUB_PASSWORD&#125;</span>@github.com/my_account/myrepo.git"</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> MY_REPO_GIT &gt;&gt; requirements.txt</span><br></pre></td></tr></table></figure>
+
+<p>and it will generate private repos link with user information to <code>requirements.txt</code> before executing <code>bin/compile</code>. Finally it can install all things your want with this solution.</p>
+<h2 id="Failed-Try"><a href="#Failed-Try" class="headerlink" title="Failed Try"></a>Failed Try</h2><p>We’ve tried to use <code>setup.py</code> to do customization in installation but it didn’t work because heroku team thinks <code>setup.py</code> can do everything and it’s unsafe if exposing all build environment settings on it.</p>
+<h2 id="Thoughts"><a href="#Thoughts" class="headerlink" title="Thoughts"></a>Thoughts</h2><p>It’s a pretty interesting journey when knowing how the buildpack works and figuring out the code for me haha. But <code>pre_compile</code> seems a deprecated feature in heroku. Not sure when it will be removed.</p>
+<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><ul>
+<li><a href="https://devcenter.heroku.com/articles/buildpacks" target="_blank" rel="noopener">Heroku Buildpacks</a></li>
+<li><a href="https://github.com/heroku/heroku-buildpack-python/blob/master/bin/compile" target="_blank" rel="noopener">bin/compile</a></li>
+</ul>
+]]></content>
+      <tags>
+        <tag>python</tag>
+        <tag>github</tag>
+        <tag>heroku</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Beautiful Machine Learning Pipeline with Scikit Learn</title>
+    <url>/2020/03/29/beautiful-machine-learning-pipeline-with-scikit-learn/</url>
+    <content><![CDATA[<p>Doing feature engineering is the most complex part when applying machine learning to your product. This note aims to give better manners when using scikit-learn to do feature engineering and machine learning based my personal experience.</p>
+<p>Before introducing my strategies, let’s review common feature engineering problems first:</p>
+<ul>
+<li>handling missing values</li>
+<li>nomarlization / standardization</li>
+<li>featuree interaction</li>
+<li>label encoding</li>
+<li>one hot encoding</li>
+</ul>
+<p>When starting feature engineering part in developing a machine learning model, we usually need to try many possible solutions and iterate different possible combinations of feature tricks quickly. There are many articles talking about how to do above feature engineering works. But when you want to apply different approaches to different features, you may write complicated code to do feature engineering. The code may contains multiple numpy / scipy transformation and feed back into scikit learn pipelines. It causes the code is not easy to maintain and hard to debug when problem occurs. In this article, I want to introduce multiple tricks in scikit-learn to build up a machine learning model pipeline that covers:</p>
+<ul>
+<li>feature engineering on different columns</li>
+<li>ensemble learning with customized transformers</li>
+<li>deep learning API with complicated feature pipeline</li>
+</ul>
+<p>We define some code snippets about input / output data here before we talk about the detail:</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">train_data = pd.read_csv(<span class="string">"input_data.csv"</span>)</span><br><span class="line">train_labels = pd.read_csv(<span class="string">"input_labels.cs v"</span>)</span><br><span class="line">predict_data = pd.read_csv(<span class="string">"predict_data.csv"</span>)</span><br></pre></td></tr></table></figure>
+
+<h1 id="Idea-1-Naive-Feature-Engineering"><a href="#Idea-1-Naive-Feature-Engineering" class="headerlink" title="Idea 1. Naive Feature Engineering"></a>Idea 1. Naive Feature Engineering</h1><p>Let’s see how to do simple feature engineering if you don’t apply pipeline.</p>
+<h2 id="Code-Example"><a href="#Code-Example" class="headerlink" title="Code Example"></a>Code Example</h2><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">pca_transform = PCA(n_components=<span class="number">10</span>)</span><br><span class="line">pca_transform.fit(train_data.values)</span><br><span class="line">pca_transform_data = pca_transform.transform(train_data.values)</span><br><span class="line"></span><br><span class="line">nmf_transform = NMF()</span><br><span class="line">nmf_transform.fit(train_data.values)</span><br><span class="line">nmf_transform_data = nmf_transform.transform(train_data.values)</span><br><span class="line"></span><br><span class="line">union_data = np.hstack(nmf_transform_data, pca_transform_data)</span><br><span class="line"></span><br><span class="line">model = RandomForestClassifier()</span><br><span class="line">model.fit(union_data, train_labels.values)</span><br><span class="line"></span><br><span class="line">pca_transform_predict_data = pca_transform.transform(predict_data.values)</span><br><span class="line">nmf_transform_predict_data = nmf_transform.transform(predict_data.values)</span><br><span class="line">union_predict_data = np.hstack(</span><br><span class="line">	pca_transform_predict_data, nmf_transform_predict_data)</span><br><span class="line">predictions = model.predict(union_predict_data)</span><br></pre></td></tr></table></figure>
+<p>As you can see, this is pretty intuitive implementation if you want to apply some feature engineering tricks on your data. But you can imagine that the code will grow into a messy monster if you apply many tricks and to different features.</p>
+<h2 id="Pros"><a href="#Pros" class="headerlink" title="Pros"></a>Pros</h2><ul>
+<li>Naive implementation</li>
+</ul>
+<h2 id="Cons"><a href="#Cons" class="headerlink" title="Cons"></a>Cons</h2><ul>
+<li>Need to care many details with numpy / scipy interface</li>
+<li>Have many duplicate code to do similar things</li>
+</ul>
+<h1 id="Idea-2-Scikit-Learn-Model-Pipeline"><a href="#Idea-2-Scikit-Learn-Model-Pipeline" class="headerlink" title="Idea 2. Scikit Learn Model Pipeline"></a>Idea 2. Scikit Learn Model Pipeline</h1><p>To make the whole operation more clean, scikit-learn provides <a href="https://scikit-learn.org/stable/modules/generated/sklearn.pipeline.Pipeline.html#sklearn.pipeline.Pipeline" target="_blank" rel="noopener">pipeline API</a> to let user create a machine learning pipeline without caring about detail stuffs. </p>
+<h2 id="Code-Example-1"><a href="#Code-Example-1" class="headerlink" title="Code Example"></a>Code Example</h2><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">model_pipeline = Pipeline(steps=[</span><br><span class="line">	(<span class="string">"dimension_reduction"</span>, PCA(n_components=<span class="number">10</span>)),</span><br><span class="line">	(<span class="string">"classifiers"</span>, RandomForestClassifier())</span><br><span class="line">])</span><br><span class="line"></span><br><span class="line">model_pipeline.fit(train_data.values, train_labels.values)</span><br><span class="line">predictions = model_pipeline.predict(predict_data.values)</span><br></pre></td></tr></table></figure>
+
+<h2 id="Pros-1"><a href="#Pros-1" class="headerlink" title="Pros"></a>Pros</h2><ul>
+<li>Get rid of handling details between two stages.</li>
+<li>Code is easy to maintain</li>
+</ul>
+<h2 id="Cons-1"><a href="#Cons-1" class="headerlink" title="Cons"></a>Cons</h2><ul>
+<li>If you use this implementation, only apply 1 type of transformation to given features. But this is the first step to make your pipeline more elegant.</li>
+</ul>
+<h1 id="Idea-3-Feature-Union-with-Pipeline"><a href="#Idea-3-Feature-Union-with-Pipeline" class="headerlink" title="Idea 3. Feature Union with Pipeline"></a>Idea 3. Feature Union with Pipeline</h1><p>If you want to apply different feature processing features on your dataset. You can try <a href="https://scikit-learn.org/stable/modules/generated/sklearn.pipeline.FeatureUnion.html" target="_blank" rel="noopener">Feature Union API</a>. The API provides simple way to merge arrays from different types transformation. Here is the code snippets if you want to use it:</p>
+<h2 id="Code-Example-2"><a href="#Code-Example-2" class="headerlink" title="Code Example"></a>Code Example</h2><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">model_pipeline = Pipeline(steps=[</span><br><span class="line">	(<span class="string">"feature_union"</span>, FeatureUnion([</span><br><span class="line">		(<span class="string">"pca"</span>, PCA(n_components=<span class="number">1</span>)),</span><br><span class="line">		(<span class="string">"svd"</span>, TruncatedSVD(n_components=<span class="number">2</span>))</span><br><span class="line">	])),</span><br><span class="line">	(<span class="string">"classifiers"</span>, RandomForestClassifier())</span><br><span class="line">])</span><br><span class="line"></span><br><span class="line">model_pipeline.fit(train_data.values, train_labels.values)</span><br><span class="line">predictions = model_pipeline.predict(predict_data.values)</span><br></pre></td></tr></table></figure>
+
+<h2 id="Pros-2"><a href="#Pros-2" class="headerlink" title="Pros"></a>Pros</h2><ul>
+<li>Use different feature transformer without seperating your code into several parts and compose them.</li>
+</ul>
+<h2 id="Cons-2"><a href="#Cons-2" class="headerlink" title="Cons"></a>Cons</h2><ul>
+<li>Cannot apply different transformation by different features</li>
+<li>Cannot direct send pandas dataframe and use dict-like way to access data in your pipeline.</li>
+</ul>
+<h1 id="Idea-4-Idea-3-Column-Transformer"><a href="#Idea-4-Idea-3-Column-Transformer" class="headerlink" title="Idea 4. Idea 3 + Column Transformer"></a>Idea 4. Idea 3 + Column Transformer</h1><p>With <strong>Idea 3</strong>, you can easily implement your pipeline with different transformation. But there are two problems we mentioned above, we try to solve those problems and find a <a href="https://scikit-learn.org/stable/modules/generated/sklearn.compose.ColumnTransformer.html" target="_blank" rel="noopener">Column Transformer API</a> after survey different materials. I pretty like this API because it makes you can simplify your pipeline like configuration and train / predict your data with a simple command.</p>
+<h2 id="Code-Example-3"><a href="#Code-Example-3" class="headerlink" title="Code Example"></a>Code Example</h2><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">model_pipeline = Pipeline(steps=[</span><br><span class="line">    (<span class="string">"features"</span>, FeatureUnion([</span><br><span class="line">        (</span><br><span class="line">            <span class="string">"numerical_features"</span>,</span><br><span class="line">            ColumnTransformer([</span><br><span class="line">                (</span><br><span class="line">                    <span class="string">"numerical"</span>,</span><br><span class="line">                    Pipeline(steps=[(</span><br><span class="line">                        <span class="string">"impute_stage"</span>,</span><br><span class="line">                        SimpleImputer(missing_values=np.nan, strategy=<span class="string">"median"</span>,)</span><br><span class="line">                    )]),</span><br><span class="line">                    [<span class="string">"feature_1"</span>]</span><br><span class="line">                )</span><br><span class="line">            ])</span><br><span class="line">        ), (</span><br><span class="line">            <span class="string">"categorical_features"</span>,</span><br><span class="line">            ColumnTransformer([</span><br><span class="line">                (</span><br><span class="line">                    <span class="string">"country_encoding"</span>,</span><br><span class="line">                    Pipeline(steps=[</span><br><span class="line">                        (<span class="string">"ohe"</span>, OneHotEncoder(handle_unknown=<span class="string">"ignore"</span>)),</span><br><span class="line">                        (<span class="string">"reduction"</span>, NMF(n_components=<span class="number">8</span>)),</span><br><span class="line">                    ]),</span><br><span class="line">                    [<span class="string">"country"</span>],</span><br><span class="line">                ),</span><br><span class="line">            ])</span><br><span class="line">        ), (</span><br><span class="line">            <span class="string">"text_features"</span>,</span><br><span class="line">            ColumnTransformer([</span><br><span class="line">                (</span><br><span class="line">                    <span class="string">"title_vec"</span>,</span><br><span class="line">                    Pipeline(steps=[</span><br><span class="line">                        (<span class="string">"tfidf"</span>, TfidfVectorizer()),</span><br><span class="line">                        (<span class="string">"reduction"</span>, NMF(n_components=<span class="number">50</span>)),</span><br><span class="line">                    ]),</span><br><span class="line">                    <span class="string">"title"</span></span><br><span class="line">                )</span><br><span class="line">            ])</span><br><span class="line">        )</span><br><span class="line">    ])),</span><br><span class="line">    (<span class="string">"classifiers"</span>, RandomForestClassifier())</span><br><span class="line">])</span><br><span class="line"></span><br><span class="line">model_pipeline.fit(train_data, train_labels.values)</span><br><span class="line">predictions = model_pipeline.predict(predict_data)</span><br></pre></td></tr></table></figure>
+
+<h2 id="Pros-3"><a href="#Pros-3" class="headerlink" title="Pros"></a>Pros</h2><p>All data transformation can be integrated into a model pipeline and easy to maintain. You can separate differet types of data such as numerical data and categorical data and process them in different methods.</p>
+<h2 id="Cons-3"><a href="#Cons-3" class="headerlink" title="Cons"></a>Cons</h2><p>I can’t find any difficulty if we used such kind of implementation on feature engineering.</p>
+<hr>
+<h1 id="More-tricks-in-your-pipeline"><a href="#More-tricks-in-your-pipeline" class="headerlink" title="More tricks in your pipeline"></a>More tricks in your pipeline</h1><p>With above tricks, you can create a machine learning pipeline elegantly. Here I want to introduce some advanced tricks, it covers:</p>
+<ul>
+<li>how to do stacking ensemble learning in your pipeline</li>
+<li>how to integrate keras in your pipeline</li>
+</ul>
+<h2 id="Stacking-ensemble-methods-in-a-pipeline"><a href="#Stacking-ensemble-methods-in-a-pipeline" class="headerlink" title="Stacking ensemble methods in a pipeline"></a>Stacking ensemble methods in a pipeline</h2><p>As you know, we usually want to use stacking method to avoid bias from one specific method. If you still a newbie of stacking learning, you can read <a href="http://blog.kaggle.com/2016/12/27/a-kagglers-guide-to-model-stacking-in-practice/" target="_blank" rel="noopener">this tutorial</a> first. So when implementing stacking methods, the question is: how to make stacking method as one step in your pipeline? I read <a href="http://zacstewart.com/2014/08/05/pipelines-of-featureunions-of-pipelines.html" target="_blank" rel="noopener">this material</a> and the spirit to create the step is building a customized transformer class .<br>The implementation here is not the perfect one but a good starting material to let us expand.</p>
+<h2 id="Quickly-adapt-neural-network-model-with-Keras-API"><a href="#Quickly-adapt-neural-network-model-with-Keras-API" class="headerlink" title="Quickly adapt neural network model with Keras API"></a>Quickly adapt neural network model with Keras API</h2><p><a href="https://keras.io/scikit-learn-api/" target="_blank" rel="noopener">Keras Scikit-Learn API</a> provides a simple way to let you integrate your neural network model with scikit learn API. You can quickly implement your keras model and integrate with your custom pipeline as one step in your pipeline object.</p>
+<p>But there is a drawback is that the steps outside neural networks cannot be optimized by neural network. You still need to optimized your feature engineering part by yourself but it can handle data preprocessing part if you want to use neural network in your pipeline. Another point is that I haven’t try to implement the pipeline if my neural network part is multiple input, so I have no idea about how to integrate multi-inputs neural network in a scikit-learn pipeline.</p>
+<hr>
+<h1 id="Conclusion"><a href="#Conclusion" class="headerlink" title="Conclusion"></a>Conclusion</h1><p>This is just simple introduction to give a thought how to do feature engineering in an elegant way. I believe there are still many awesome tricks can help us create machine learning pipelines with simple code. With survey the documentation and API design in scikit-learn, I enjoy their thoughts on machine learning development and think that is pretty worth to follow them.</p>
+]]></content>
+      <tags>
+        <tag>python</tag>
+        <tag>machine-learning</tag>
+        <tag>scikit-learn</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Graceful Data Ingestion with SQLAlchemy and Pandas</title>
+    <url>/2020/03/29/graceful-data-ingestion-with-sqlalchemy-and-pands/</url>
+    <content><![CDATA[<p>When the data size is not large enough to use distributed computing frameworks (like Apache Spark), processing data in a machine with pandas is an efficient way. But how to insert data with dataframe object in an elegant way is a big challenge. As we know, python has a good database tookit <a href="https://www.sqlalchemy.org/" target="_blank" rel="noopener">SQLAlchemy</a> with good ORM integration and a good data processing library <a href="https://pandas.pydata.org/" target="_blank" rel="noopener">Pandas</a>. Here we explore some different implementations and discuss the pros and cons in this article.</p>
+<h2 id="Problem"><a href="#Problem" class="headerlink" title="Problem"></a>Problem</h2><p>With a pandas dataframe with thousands data and complex data type. How to load the data into target database fast and the code should be easy to maintain.</p>
+<p><strong>Note. Here we use PostgreSQL as the target database.</strong></p>
+<hr>
+<h2 id="Simple-Idea-Use-Pandas-df-to-sql-function"><a href="#Simple-Idea-Use-Pandas-df-to-sql-function" class="headerlink" title="Simple Idea - Use Pandas df.to_sql function"></a>Simple Idea - Use Pandas <code>df.to_sql</code> function</h2><p>With this function, you can insert your data with pandas API <a href="https://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.to_sql.html" target="_blank" rel="noopener">df.to_sql</a>, then you done the work!</p>
+<h3 id="Advantages"><a href="#Advantages" class="headerlink" title="Advantages"></a>Advantages</h3><p>Easiest way to implement.</p>
+<h3 id="Drawbacks"><a href="#Drawbacks" class="headerlink" title="Drawbacks"></a>Drawbacks</h3><ul>
+<li>Very slow!</li>
+<li>If you need to truncate the table first, it is not a smart way to use the function.</li>
+</ul>
+<hr>
+<h2 id="Another-Simple-Idea-Inserting-Data-With-CSV-Files"><a href="#Another-Simple-Idea-Inserting-Data-With-CSV-Files" class="headerlink" title="Another Simple Idea - Inserting Data With CSV Files"></a>Another Simple Idea - Inserting Data With CSV Files</h2><p>Another naive idea to solve this problem is to output dataframe as a CSV file and use <code>copy</code> command or the same implementation in python to import data into database.<br>Following is the code example:</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">bulkload_csv_data_to_database</span><span class="params">(engine, tablename, columns, data, sep=<span class="string">","</span>)</span>:</span></span><br><span class="line">    logging.info(<span class="string">"Start ingesting data into postgres ..."</span>)</span><br><span class="line">    logging.info(<span class="string">"Table name: &#123;table&#125;"</span>.format(table=tablename))</span><br><span class="line">    logging.info(<span class="string">"CSV schema: &#123;schema&#125;"</span>.format(schema=columns))</span><br><span class="line">    conn = engine.connect().connection</span><br><span class="line">    cursor = conn.cursor()</span><br><span class="line">    cursor.copy_from(data, tablename, columns=columns, sep=sep, null=<span class="string">'null'</span>)</span><br><span class="line">    conn.commit()</span><br><span class="line">    conn.close()</span><br><span class="line">    logging.info(<span class="string">"Finish ingesting"</span>)</span><br><span class="line"></span><br><span class="line">df.to_csv(csv_path, index=<span class="literal">False</span>, header=<span class="literal">False</span>)</span><br><span class="line">buldload_csv_data_to_database(engine, tablename, columns, data)</span><br></pre></td></tr></table></figure>
+
+<h3 id="Advantages-1"><a href="#Advantages-1" class="headerlink" title="Advantages"></a>Advantages</h3><p>The loading speed is fast!</p>
+<h3 id="Drawbacks-1"><a href="#Drawbacks-1" class="headerlink" title="Drawbacks"></a>Drawbacks</h3><p>Need to maintain and process data to CSV format that the target database library recognizes it. It goes crazy when your schema is pretty complicated (think about the data with json fields and arrays …). You’ll need to consider the format between <code>df.to_csv</code> and <code>cursor.copy_from</code> very carefully.</p>
+<hr>
+<h2 id="Third-Idea-Insert-Data-by-SQLAlchemy-ORM"><a href="#Third-Idea-Insert-Data-by-SQLAlchemy-ORM" class="headerlink" title="Third Idea - Insert Data by SQLAlchemy ORM"></a>Third Idea - Insert Data by SQLAlchemy ORM</h2><p>To get rid of the huge effort to maintain the CSV format, another solution is to use the same method in web: creating a table object with pandas row and add the object to a session one by one. Following is a simple example:</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">Session = sessionmaker(bind=conn)</span><br><span class="line">session = Session()</span><br><span class="line"><span class="keyword">for</span> _, row <span class="keyword">in</span> df.iterrows():</span><br><span class="line">	user = User(name=row[<span class="string">"name"</span>])</span><br><span class="line">	session.add(user)</span><br><span class="line">session.commit()</span><br><span class="line">session.close()</span><br></pre></td></tr></table></figure>
+
+<h3 id="Advantages-2"><a href="#Advantages-2" class="headerlink" title="Advantages"></a>Advantages</h3><ul>
+<li>Easy to maintain</li>
+<li>Enjoy ORM’s advantages</li>
+</ul>
+<h3 id="Drawbacks-2"><a href="#Drawbacks-2" class="headerlink" title="Drawbacks"></a>Drawbacks</h3><ul>
+<li>Slow, because it need to execute clause one by one.</li>
+</ul>
+<hr>
+<h2 id="Fourth-Idea-Insert-Data-with-Pandas-and-SQLAlchemy-ORM"><a href="#Fourth-Idea-Insert-Data-with-Pandas-and-SQLAlchemy-ORM" class="headerlink" title="Fourth Idea - Insert Data with Pandas and SQLAlchemy ORM"></a>Fourth Idea - Insert Data with Pandas and SQLAlchemy ORM</h2><p>With exploration on SQLAlchemy document, we found there are <a href="https://docs.sqlalchemy.org/en/latest/orm/persistence_techniques.html#bulk-operations" target="_blank" rel="noopener">bulk operations</a> in SQLAlchemy ORM component. In this document, we found <code>bulk_insert_mappings</code> can use list of dictionary with mappings. With this, we can easily develop bulk insert and maintainable code with pandas dataframe.</p>
+<p>Here is the code example:</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">Session = sessionmaker(bind=dest_db_con)</span><br><span class="line">session = Session()</span><br><span class="line">session.bulk_insert_mappings(MentorInformation, df.to_dict(orient=<span class="string">"records"</span>))</span><br><span class="line">session.close()</span><br></pre></td></tr></table></figure>
+
+<h3 id="Advantages-3"><a href="#Advantages-3" class="headerlink" title="Advantages"></a>Advantages</h3><ul>
+<li>Fast</li>
+<li>Simple</li>
+<li>Easy to maintain</li>
+<li>Enjoy ORM’s advantages</li>
+</ul>
+<h3 id="Drawbacks-3"><a href="#Drawbacks-3" class="headerlink" title="Drawbacks"></a>Drawbacks</h3><p>No concern from my point.</p>
+<hr>
+<h2 id="Conclusion-amp-Discussion"><a href="#Conclusion-amp-Discussion" class="headerlink" title="Conclusion &amp; Discussion"></a>Conclusion &amp; Discussion</h2><p>Because pandas can only process data in a machine, how to solve the same problem in distributed environments is worthwhile to think also. There are many frameworks like Apache Spark to solve the extended problem. </p>
+<p>But in single-machine size data, using pandas + SQLAlchemy is a powerful way to solve the data ingestion problem enough!</p>
+]]></content>
+      <tags>
+        <tag>python</tag>
+        <tag>pandas</tag>
+        <tag>sqlalchemy</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Access Dataflow Template Pipeline with GCP Rest API</title>
+    <url>/2020/03/29/access-dataflow-template-pipeline-with-gcp-rest-api/</url>
+    <content><![CDATA[<p>趁著還有記憶的時候把這個問題記錄下來一下…</p>
+<p>最近開始有需求要使用Dataflow來開發一些 ETL job , 基於一些技術上的原因(decouple repos between Airflow dag and Dataflow pipeline 等等), 我們採用了dataflow的template engine. </p>
+<p>而把開發好的dataflow放到template之後, 我們才用airflow來trigger template jobs, 這時候的需求會有</p>
+<ol>
+<li>創造某個template的pipeline job</li>
+<li>監視某個pipeline job的狀態, 如果有錯的話要能夠通知我們</li>
+</ol>
+<p>第一項的話google有<code>gcloud</code>的指令可以快速幫你建立job(可參考<a href="https://cloud.google.com/dataflow/docs/templates/executing-templates" target="_blank" rel="noopener">https://cloud.google.com/dataflow/docs/templates/executing-templates</a>).<br>而第二項的話, 要建立notification其實可以用stackdriver. 但是我們的case還非常簡單, 所以想了一想決定先不需要跳下去使用stackdriver, 而是簡單的去listen job的狀態即可.<br>為了達到上述的目的, 又保持整個stack在一個比較單純的狀況下, 我們決定使用Dataflow的<a href="https://cloud.google.com/dataflow/docs/reference/rest/" target="_blank" rel="noopener">Rest API</a> 做到這些事情.</p>
+<p>而要使用GCP的Rest API時, 其實首要會遇到的就是authentication的問題, 而這部分看文件的時候覺得有點複雜, 後來索性去看他的source code裡面有提供什麼東西XDD. 猛烈研究一陣子之後發現了他有提供一些很好去把你的http client帶上Google oauth token的方法, 主要的關鍵有這兩個</p>
+<ul>
+<li><code>service_account.Credentials</code></li>
+<li><code>google.auth.transport.urlib3.AuthorizedHttp</code></li>
+</ul>
+<p>首先可以用你local的file去拿credential, 然後<code>AuthorizedHttp</code>的class在initial的時候帶入那個credential, 就可以拿到支援GCP request的http client. 大致上的code如下</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_gcp_oauth_credential</span><span class="params">(scopes=None, cred_json)</span>:</span></span><br><span class="line">    <span class="string">"""</span></span><br><span class="line"><span class="string">    Get GCP oauth credential from os environment variable</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line">    cred = service_account.Credentials.from_service_account_info(</span><br><span class="line">        cred_json,</span><br><span class="line">        scopes=scopes</span><br><span class="line">    )</span><br><span class="line">    <span class="keyword">return</span> cred</span><br><span class="line">      </span><br><span class="line">http_client = urllib3.AuthorizedHttp(oauth_obj)</span><br></pre></td></tr></table></figure>
+
+<p>完成認證之後拿到的那個http client, 剩下的用法就跟urllib差不多, 照著spec打API就可以了.<br>為了做到create template pipeline跟monitor job status, 這次主要用到的API有兩個:</p>
+<ul>
+<li>template job <code>create</code> API<a href="https://cloud.google.com/dataflow/docs/reference/rest/v1b3/projects.templates/create" target="_blank" rel="noopener">https://cloud.google.com/dataflow/docs/reference/rest/v1b3/projects.templates/create</a>:</li>
+<li>job status <code>get</code> API<a href="https://cloud.google.com/dataflow/docs/reference/rest/v1b3/projects.jobs/get" target="_blank" rel="noopener">https://cloud.google.com/dataflow/docs/reference/rest/v1b3/projects.jobs/get</a></li>
+</ul>
+<p>舉例來說, 如果我們想要去送一個job, 然後去看一下某個job的狀態, 只要從trigger的request裡面抓出<code>job_id</code>, 再送進去job get的API就好, 可以簡單的參考一下下面的程式碼</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">resp = http_client.urlopen(</span><br><span class="line">    <span class="string">"POST"</span>, url, body=json.dumps(request_body)</span><br><span class="line">)</span><br><span class="line">    </span><br><span class="line"><span class="keyword">if</span> resp.status != <span class="number">200</span>:</span><br><span class="line">   <span class="keyword">raise</span> Exception(<span class="string">"request failed"</span>)</span><br><span class="line">    </span><br><span class="line">job_meta = json.loads(resp.data)</span><br><span class="line">job_id = job_meta[<span class="string">"job"</span>][<span class="string">"id"</span>]</span><br><span class="line">    </span><br><span class="line">job_status_resp = http_client.urlopen(</span><br><span class="line">    <span class="string">"GET"</span>,</span><br><span class="line">    <span class="string">"&#123;api_prefix&#125;/projects/&#123;projecT_id&#125;/jobs/&#123;job_id&#125;"</span>.format(</span><br><span class="line">        api_prefix=api_prefix,</span><br><span class="line">        project_id=project_id,</span><br><span class="line">        job_id=job_id</span><br><span class="line">    )</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>基本上只要有了那個<code>AuthorizedHttp</code>, GCP的Rest API都可以打~~ , 真的是很好用XDD</p>
+<p>其實這次已經是不知到底幾次爬google open出來的source code才有感覺他的API應該要怎麼用了, 他的文件的邏輯有時候感覺並不是很清楚QQ 或是散落在這個地方, 不過也因為這樣多瞭解了一些它裡面的實作, 真是好事～</p>
+]]></content>
+      <tags>
+        <tag>python</tag>
+        <tag>dataflow</tag>
+        <tag>gcp</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Access BigQuery by String Credential in Python</title>
+    <url>/2020/03/29/access-bigquery-by-string-credential-in-python/</url>
+    <content><![CDATA[<h2 id="為什麼會有這個需求"><a href="#為什麼會有這個需求" class="headerlink" title="為什麼會有這個需求"></a>為什麼會有這個需求</h2><ul>
+<li>在Saas平台上開發你的程式的時候, 又需要access bigquery API時<ul>
+<li>for example: heroku, aws lambda …</li>
+<li>以Heroku為例, 放在git repository上的話會有security issue (不應該把keytab / credential file放在repository裡面)</li>
+</ul>
+</li>
+<li>如果有多的不同的credential在同一個APP裡面要放進來, 應該要怎麼處理?</li>
+</ul>
+<h2 id="Google-BigQuery-官方文件上的做法"><a href="#Google-BigQuery-官方文件上的做法" class="headerlink" title="Google BigQuery 官方文件上的做法"></a>Google BigQuery 官方文件上的做法</h2><ul>
+<li>吃 <code>GOOGLE_APPLICATION_CREDENTIALS</code> 環境變數, 這個變數裡面放的是一個file path, 標明credential放在哪邊</li>
+<li>直接呼叫API <code>bigquery.client.Client()</code>, 會直接create一個instance裡面直接把環境變數裡的credential吃進來並且處理好, 非常方便且懶人, 但是彈性上就會有上述的問題</li>
+</ul>
+<h2 id="解法"><a href="#解法" class="headerlink" title="解法"></a>解法</h2><ul>
+<li><p>爬code後, 發現他需要吃特定type的credential (<a href="https://github.com/GoogleCloudPlatform/google-cloud-python/blob/master/bigquery/google/cloud/bigquery/client.py#L94-L116" target="_blank" rel="noopener">code link</a>) <code>google.auth.credentials.Cedentials</code></p>
+</li>
+<li><p>用service_account的API去創造credential (<a href="https://github.com/GoogleCloudPlatform/google-auth-library-python/blob/master/google/oauth2/service_account.py" target="_blank" rel="noopener">code link</a>)<br><code>cred = service_account.Credentials.from_service_account_info(cred_dict)</code></p>
+</li>
+<li><p>Initial client的時候, 可以提供自己做出來的credential<br><code>client = bigquery.client.Client(project=proj_name, credentials=cred)</code></p>
+</li>
+</ul>
+<h2 id="後記"><a href="#後記" class="headerlink" title="後記"></a>後記</h2><p>直覺上這個方式應該是可以處理大部分在GCP上面content-based python client的認證.<br>同時在尋找解法的時候其實看到很多現有的解法(stackoverflow, quora…),已經因為API的改動之類的已經無法適用了,去看官方文件也不太好找或是寫的不是好懂,所以才去追原始碼. </p>
+<p>意外發現google release的原始碼實在是很好追(只要找到進入點, comment寫得很完整, 程式的架構也很好, 值得好好學習QQ), 下次在GCP上面遇到類似的問題可以嘗試直接追原始碼看看會不會比較快得到方向及真正的做法.</p>
+]]></content>
+      <tags>
+        <tag>python</tag>
+        <tag>bigquery</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Load Scikit-Learn Models from GCS</title>
+    <url>/2020/03/29/load-sklearn-models-from-gcs/</url>
+    <content><![CDATA[<p>最近在做新的machine learning model deploy方法的時候遇到一個問題<br>順手紀錄一下</p>
+<p>在我們的case裡面, model開發完之後必須要deploy到web service<br>deploy的時候第一個問題通常是要怎麼把訓練好的模型load進去service裡,<br>讓他能夠serve request</p>
+<p>目前我們用的machine learning package是scikit-learn,<br>他的model可以使用joblib或是pickle輸出成一個檔案(詳細可以參考這個<a href="http://scikit-learn.org/stable/modules/model_persistence.html" target="_blank" rel="noopener">link</a>)</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> sklearn.externals <span class="keyword">import</span> joblib</span><br><span class="line"></span><br><span class="line">model = ...</span><br><span class="line">joblib.dump(model, <span class="string">"path_you_want_to_put.pkl"</span>)</span><br></pre></td></tr></table></figure>
+
+<p>在loading的時候也很簡單</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">model_path = <span class="string">"path_you_want_to_put.pkl"</span>)</span><br><span class="line">joblib.load(model_path)</span><br></pre></td></tr></table></figure>
+
+<p>而我們這次想做的一個嘗試就是把model放到cloud storage上(例如google cloud storage or AWS S3), 然後再web service把model load進來,<br>一切看起來如此美好XDD<br>但是我們的web service其實是放在heroku上面!<br>而heroku官方在上面並不鼓勵把download file到他的app directory裡<br>於是就開始研究了要怎麼在heroku上面直接load remote file下來的過程</p>
+<p>最後發現兩件事情可以解決這個問題</p>
+<ul>
+<li><code>joblib.load</code>可以讀file object</li>
+<li>python io package有實作read/write (詳情可以參考<a href="https://docs.python.org/3/library/io.html" target="_blank" rel="noopener">官方文件</a>)<br>綜合以上兩件事情就可以把model load進memory裡面了</li>
+</ul>
+<p>簡單附上snippets供大家參考</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">load_model_from_gcs</span><span class="params">(self, gcs_model_path, gcs_bucket)</span>:</span></span><br><span class="line">  storage_client = storage.Client()</span><br><span class="line">  bucket = storage_client.get_bucket(gcs_bucket)</span><br><span class="line">  blob = bucket.blob(gcs_path)</span><br><span class="line">  f = io.BytesIO()</span><br><span class="line">  blob.download_to_file(f)</span><br><span class="line">  <span class="keyword">return</span> joblib.load(f)</span><br></pre></td></tr></table></figure>
+
+]]></content>
+      <tags>
+        <tag>python</tag>
+        <tag>scikit-learn</tag>
+        <tag>gcs</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Python Development Environment</title>
+    <url>/2020/03/29/python-development-environment/</url>
+    <content><![CDATA[<p>This post is my notes on how to develop python projects easily and thoughts on python project environment management. If anything better and newest, please let me know in comments!</p>
+<h1 id="Why-we-need-a-better-environment-to-do-development"><a href="#Why-we-need-a-better-environment-to-do-development" class="headerlink" title="Why we need a better environment to do development?"></a>Why we need a better environment to do development?</h1><p>For every project, we need to build up a project environment to manage the packages of a project, building process, and how to test it. With a fantastic environment, developer can get benefit with following advantages:</p>
+<h2 id="Advantage-1-Speed-Up-Development"><a href="#Advantage-1-Speed-Up-Development" class="headerlink" title="Advantage 1. Speed Up Development"></a>Advantage 1. Speed Up Development</h2><ul>
+<li>with a good environment, developers can quickly build/develop/test/deploy code on any machine</li>
+<li>quick deployment is very important on CI/CD<ul>
+<li>easy to release</li>
+<li>agile testing</li>
+</ul>
+</li>
+</ul>
+<h2 id="Advantage-2-Control-dependencies-of-projects"><a href="#Advantage-2-Control-dependencies-of-projects" class="headerlink" title="Advantage 2. Control dependencies of projects"></a>Advantage 2. Control dependencies of projects</h2><ul>
+<li>different projects will not share same packages they don’t use</li>
+<li>avoid dependency conflict between different projects<ul>
+<li>For example, if package A uses a package with latest version and another one uses older version. We can develop and manage the dependency by project independently and avoid hidden conflicts between two versions.</li>
+</ul>
+</li>
+<li>keep projects smallest size </li>
+</ul>
+<p>Though good environment makes developers happy, building a good development environment needs huge effort and challenging. Here we introduce some common practices to build up python development environment. </p>
+<h1 id="How-to-manage-your-python-environment"><a href="#How-to-manage-your-python-environment" class="headerlink" title="How to manage your python environment?"></a>How to manage your python environment?</h1><h2 id="Tip-1-Manage-Python-Version"><a href="#Tip-1-Manage-Python-Version" class="headerlink" title="Tip 1. Manage Python Version"></a>Tip 1. Manage Python Version</h2><h3 id="Why"><a href="#Why" class="headerlink" title="Why"></a>Why</h3><p>Python has different versions (<code>python 2.6</code>, <code>python 2.7</code>, <code>python 3.x</code> … ). For each project, you need to decide which version in your project or you need to develop an old project which build on <code>python 2.6</code>. Quickly changing your environment can help you know which version of python you are using!</p>
+<h3 id="How"><a href="#How" class="headerlink" title="How"></a>How</h3><ul>
+<li><code>pyenv</code>: <a href="https://github.com/pyenv/pyenv" target="_blank" rel="noopener">https://github.com/pyenv/pyenv</a></li>
+<li>Like <code>rbenv</code> in ruby if you are a ruby user XD</li>
+<li>commands:<ul>
+<li><code>pyenv versions</code>: list all python versions in pyenv</li>
+<li><code>pyenv global {python_version}</code>: setup global environment of python.</li>
+<li>Provide support for per-project Python versions.</li>
+</ul>
+</li>
+</ul>
+<h2 id="Tip-2-Separate-environment-of-each-project-with-virtual-environment"><a href="#Tip-2-Separate-environment-of-each-project-with-virtual-environment" class="headerlink" title="Tip 2. Separate environment of each project with virtual environment"></a>Tip 2. Separate environment of each project with virtual environment</h2><h3 id="Why-1"><a href="#Why-1" class="headerlink" title="Why"></a>Why</h3><p>To develop a project, we need to build up the packages structures that this project uses. But if we use builtin python, we cannot separate requirement packages by project. Think about the case: now we use <code>pyenv</code> and choose <code>python 3.6</code>  as project python version and have 2 projects to develop, how to manage the package dependencies independently? To solve this case, <code>virtualenv</code> provides a way to build up a empty python environment of a project and you can check in any environment to do related development easily.</p>
+<h3 id="How-1"><a href="#How-1" class="headerlink" title="How"></a>How</h3><ul>
+<li>project github: <a href="https://github.com/pypa/virtualenv" target="_blank" rel="noopener">https://github.com/pypa/virtualenv</a></li>
+<li>commands:<ul>
+<li><code>virtualenv ENV</code>: start a new python virtual environment in ENV directory</li>
+<li><code>source ENV/bin/activate</code>: start working in <code>ENV</code> python environment</li>
+<li><code>deactivate</code>: checkout current environment</li>
+</ul>
+</li>
+</ul>
+<h2 id="Tip-3-Manage-package-dependencies-with-pip"><a href="#Tip-3-Manage-package-dependencies-with-pip" class="headerlink" title="Tip 3. Manage package dependencies with pip"></a>Tip 3. Manage package dependencies with pip</h2><h3 id="Why-2"><a href="#Why-2" class="headerlink" title="Why"></a>Why</h3><p>Every language has similar package management tools to help developers manage their projects easily (like gem for ruby, npm for javascript, maven / sbt for java …). A package management tool can manage the dependencies and solve  of projects, for example:</p>
+<ul>
+<li>flask dependencies<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#39;Werkzeug&gt;&#x3D;0.14&#39;,</span><br><span class="line">&#39;Jinja2&gt;&#x3D;2.10&#39;,</span><br><span class="line">&#39;itsdangerous&gt;&#x3D;0.24&#39;,</span><br><span class="line">&#39;click&gt;&#x3D;5.1&#39;,</span><br></pre></td></tr></table></figure>
+and these 4 packages also have their requirement packages, a package management tool will to expand the requirement packages recursively and install it one by one. If there is version conflict (like A package needs C package with version &gt;= 3.0 and B package needs C package with version &lt; 3.0), it should have alert to notify users to fix the conflict.</li>
+</ul>
+<h3 id="How-2"><a href="#How-2" class="headerlink" title="How"></a>How</h3><ul>
+<li><a href="https://github.com/pypa/pip" target="_blank" rel="noopener">https://github.com/pypa/pip</a></li>
+<li>commands<ul>
+<li><code>pip install {package_name}</code> : install a package</li>
+<li><code>pip freeze</code>: list all packages and versions in current environment</li>
+<li><code>pip install -r {requirement_path}</code>: install all packages in <code>requirement_path</code></li>
+<li><code>pip uninstall {package_name}</code>: uninstall a package</li>
+</ul>
+</li>
+</ul>
+<h2 id="Tip-4-Latest-tool-to-build-python-development-tool-pipenv"><a href="#Tip-4-Latest-tool-to-build-python-development-tool-pipenv" class="headerlink" title="Tip 4. Latest tool to build python development tool: pipenv"></a>Tip 4. Latest tool to build python development tool: pipenv</h2><h3 id="Why-3"><a href="#Why-3" class="headerlink" title="Why"></a>Why</h3><p>To make experience better, <code>pipenv</code> can let user manage packages and environment more easily. In general, this package is like <code>virtualenv</code> + <code>pip</code>.<br>Also, this package also solves some problems if developers use <code>virtualenv</code> + <code>pip</code>. As official documents mentioned, the problems that <code>pipenv</code> wants to solve is:</p>
+<blockquote>
+<p>The problems that Pipenv seeks to solve are multi-faceted:</p>
+<ul>
+<li>You no longer need to use <code>pip</code> and <code>virtualenv</code> separately. They work together.</li>
+<li>Managing a <code>requirements.txt</code> file can be problematic, so Pipenv uses <code>Pipfile</code> and <code>Pipfile.lock</code> to separate abstract dependency declarations from the last tested combination.</li>
+<li>Hashes are used everywhere, always. Security. Automatically expose security vulnerabilities.</li>
+<li>Strongly encourage the use of the latest versions of dependencies to minimize security risks arising from outdated components.</li>
+<li>Give you insight into your dependency graph (e.g. <code>$ pipenv graph</code>).</li>
+<li>Streamline development workflow by loading <code>.env</code> files.</li>
+</ul>
+</blockquote>
+<h3 id="How-3"><a href="#How-3" class="headerlink" title="How"></a>How</h3><ul>
+<li><a href="https://docs.pipenv.org/" target="_blank" rel="noopener">https://docs.pipenv.org/</a></li>
+<li>commands<ul>
+<li><code>pipenv install</code>: install from Pipfile</li>
+<li><code>pipenv install {package}</code>: install a package</li>
+<li><code>pipenv graph</code>: list project dependency in graph</li>
+<li><code>pipenv shell</code>: enter projects python environment</li>
+</ul>
+</li>
+</ul>
+<h1 id="The-flow-practice-to-start-a-new-python-project"><a href="#The-flow-practice-to-start-a-new-python-project" class="headerlink" title="The flow practice to start a new python project"></a>The flow practice to start a new python project</h1><p>By compositing above tools with simple commands, developers can easily establish python environment for their projects. Following are the simple summary of the steps:</p>
+<ol>
+<li>Choose python version</li>
+<li>Create package environment<ul>
+<li>using <code>virtualenv</code> + <code>pip</code></li>
+<li>using <code>pipenv</code> directly</li>
+</ul>
+</li>
+<li>Start writing code!</li>
+</ol>
+<p>But yes, there are many advanced commands and usages about the packages. Still lots of things to learn … </p>
+]]></content>
+      <tags>
+        <tag>python</tag>
+      </tags>
+  </entry>
+</search>
