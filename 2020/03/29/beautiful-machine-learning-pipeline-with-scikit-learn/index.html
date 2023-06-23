@@ -1,26 +1,41 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
-<head>
-  <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
-<meta name="theme-color" content="#222">
-<meta name="generator" content="Hexo 4.2.0">
-  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
-  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+    <head>
+    <meta charset="utf-8">
 
-<link rel="stylesheet" href="/css/main.css">
+    
+
+    <!-- 渲染优化 -->
+    <meta name="renderer" content="webkit">
+    <meta name="force-rendering" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta name="HandheldFriendly" content="True" >
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+    <!--icon-->
+
+    
+    
+    
+    
+    
 
 
-<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+    <!-- meta -->
 
-<script id="hexo-configurations">
-    var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"bruce3557.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
-  </script>
 
-  <meta name="description" content="Doing feature engineering is the most complex part when applying machine learning to your product. This note aims to give better manners when using scikit-learn to do feature engineering and machine l">
+<title>Beautiful Machine Learning Pipeline with Scikit Learn | 魯斯雜想</title>
+
+
+    <meta name="keywords" content="python, machine-learning, scikit-learn">
+
+
+
+
+    <!-- OpenGraph -->
+ 
+    <meta name="description" content="Doing feature engineering is the most complex part when applying machine learning to your product. This note aims to give better manners when using scikit-learn to do feature engineering and machine l">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Beautiful Machine Learning Pipeline with Scikit Learn">
 <meta property="og:url" content="http://bruce3557.github.io/2020/03/29/beautiful-machine-learning-pipeline-with-scikit-learn/index.html">
@@ -33,171 +48,124 @@
 <meta property="article:tag" content="python">
 <meta property="article:tag" content="machine-learning">
 <meta property="article:tag" content="scikit-learn">
-<meta name="twitter:card" content="summary">
-
-<link rel="canonical" href="http://bruce3557.github.io/2020/03/29/beautiful-machine-learning-pipeline-with-scikit-learn/">
+<meta name="twitter:card" content="summary_large_image">
 
 
-<script id="page-configurations">
-  // https://hexo.io/docs/variables.html
-  CONFIG.page = {
-    sidebar: "",
-    isHome : false,
-    isPost : true,
-    lang   : 'zh-TW'
-  };
-</script>
+    
+<link rel="stylesheet" href="/css/style/main.css">
+ 
 
-  <title>Beautiful Machine Learning Pipeline with Scikit Learn | 魯斯雜想</title>
-  
+    
+    
+        <link rel="stylesheet" id="hl-default-theme" href="/css/highlight/default.css" media="none" >
+        
+            <link rel="stylesheet" id="hl-dark-theme" href="/css/highlight/dark.css" media="none">
+        
+    
+
+    
+    
+
+    
+    
+<link rel="stylesheet" href="/css/style/dark.css">
+
+    
+<script src="/js/darkmode.js"></script>
 
 
 
+     
 
+    <!-- custom head -->
 
+<meta name="generator" content="Hexo 4.2.0"></head>
 
-  <noscript>
-  <style>
-  .use-motion .brand,
-  .use-motion .menu-item,
-  .sidebar-inner,
-  .use-motion .post-block,
-  .use-motion .pagination,
-  .use-motion .comments,
-  .use-motion .post-header,
-  .use-motion .post-body,
-  .use-motion .collection-header { opacity: initial; }
-
-  .use-motion .site-title,
-  .use-motion .site-subtitle {
-    opacity: initial;
-    top: initial;
-  }
-
-  .use-motion .logo-line-before i { left: initial; }
-  .use-motion .logo-line-after i { right: initial; }
-  </style>
-</noscript>
-
-</head>
-
-<body itemscope itemtype="http://schema.org/WebPage">
-  <div class="container use-motion">
-    <div class="headband"></div>
-
-    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
-      <div class="header-inner"><div class="site-brand-container">
-  <div class="site-nav-toggle">
-    <div class="toggle" aria-label="切換導航欄">
-      <span class="toggle-line toggle-line-first"></span>
-      <span class="toggle-line toggle-line-middle"></span>
-      <span class="toggle-line toggle-line-last"></span>
+    <body>
+        <div id="app" tabindex="-1">
+            <header class="header">
+    <div class="header__left">
+        <a href="/" class="button">
+            <span class="logo__text">Demo</span>
+        </a>
     </div>
-  </div>
-
-  <div class="site-meta">
-
-    <a href="/" class="brand" rel="start">
-      <span class="logo-line-before"><i></i></span>
-      <h1 class="site-title">魯斯雜想</h1>
-      <span class="logo-line-after"><i></i></span>
+    <div class="header__right">
+        
+            <div class="navbar__menus">
+                
+                    <a href="/" class="navbar-menu button">首页</a>
+                
+                    <a href="/tags/" class="navbar-menu button">标签</a>
+                
+                    <a href="/archives/" class="navbar-menu button">归档</a>
+                
+                    <a href="/friends/" class="navbar-menu button">友链</a>
+                
+                    <a href="/page/" class="navbar-menu button">Page</a>
+                
+            </div>
+        
+        
+        
+    <a href="/search/" id="btn-search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="24" height="24" fill="currentColor" stroke="currentColor" stroke-width="32"><path d="M192 448c0-141.152 114.848-256 256-256s256 114.848 256 256-114.848 256-256 256-256-114.848-256-256z m710.624 409.376l-206.88-206.88A318.784 318.784 0 0 0 768 448c0-176.736-143.264-320-320-320S128 271.264 128 448s143.264 320 320 320a318.784 318.784 0 0 0 202.496-72.256l206.88 206.88 45.248-45.248z"></path></svg>
     </a>
-      <p class="site-subtitle" itemprop="description">我也不知道我在幹嘛 XD</p>
-  </div>
 
-  <div class="site-nav-right">
-    <div class="toggle popup-trigger">
+
+        
+        
+    <a href="javaScript:void(0);" id="btn-toggle-dark">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+    </a>
+
+
+        
+            <a class="dropdown-icon button" id="btn-dropdown" tabindex="0"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" width='24' height='24' fill="none" stroke="currentColor" stroke-width="0.7" stroke-linecap="round" stroke-linejoin="round"><path fill="currentColor" d="M3.314,4.8h13.372c0.41,0,0.743-0.333,0.743-0.743c0-0.41-0.333-0.743-0.743-0.743H3.314c-0.41,0-0.743,0.333-0.743,0.743C2.571,4.467,2.904,4.8,3.314,4.8z M16.686,15.2H3.314c-0.41,0-0.743,0.333-0.743,0.743s0.333,0.743,0.743,0.743h13.372c0.41,0,0.743-0.333,0.743-0.743S17.096,15.2,16.686,15.2z M16.686,9.257H3.314c-0.41,0-0.743,0.333-0.743,0.743s0.333,0.743,0.743,0.743h13.372c0.41,0,0.743-0.333,0.743-0.743S17.096,9.257,16.686,9.257z"></path></svg></a>
+            <div class="dropdown-menus" id="dropdown-menus">
+                
+                    <a href="/" class="dropdown-menu button">首页</a>
+                
+                    <a href="/tags/" class="dropdown-menu button">标签</a>
+                
+                    <a href="/archives/" class="dropdown-menu button">归档</a>
+                
+                    <a href="/friends/" class="dropdown-menu button">友链</a>
+                
+                    <a href="/page/" class="dropdown-menu button">Page</a>
+                
+            </div>
+        
     </div>
-  </div>
+</header>
+
+
+            <main class="main">
+    
+
+<div class="post-title">
+    <h1 class="post-title__text">
+        Beautiful Machine Learning Pipeline with Scikit Learn
+    </h1>
+    <div class="post-title__meta">
+        <a href="/archives/2020/03/" class="post-meta__date button">2020-03-29</a>
+        
+ 
+        
+    
+    
+
+
+ 
+
+ 
+    </div>
 </div>
 
 
 
-
-<nav class="site-nav">
-  <ul id="menu" class="main-menu menu">
-        <li class="menu-item menu-item-home">
-
-    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
-
-  </li>
-        <li class="menu-item menu-item-archives">
-
-    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a>
-
-  </li>
-  </ul>
-</nav>
-
-
-
-
-</div>
-    </header>
-
-    
-  <div class="back-to-top">
-    <i class="fa fa-arrow-up"></i>
-    <span>0%</span>
-  </div>
-
-
-    <main class="main">
-      <div class="main-inner">
-        <div class="content-wrap">
-          
-
-          <div class="content post posts-expand">
-            
-
-    
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
-    <link itemprop="mainEntityOfPage" href="http://bruce3557.github.io/2020/03/29/beautiful-machine-learning-pipeline-with-scikit-learn/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="bruce3557">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="魯斯雜想">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          Beautiful Machine Learning Pipeline with Scikit Learn
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">發表於</span>
-
-              <time title="創建時間：2020-03-29 15:40:32" itemprop="dateCreated datePublished" datetime="2020-03-29T15:40:32+08:00">2020-03-29</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新於</span>
-                <time title="修改時間：2021-09-19 01:50:33" itemprop="dateModified" datetime="2021-09-19T01:50:33+08:00">2021-09-19</time>
-              </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
+<article class="post content-card">
+    <div class="post__header"></div>
+    <div class="post__content">
         <p>Doing feature engineering is the most complex part when applying machine learning to your product. This note aims to give better manners when using scikit-learn to do feature engineering and machine learning based my personal experience.</p>
 <p>Before introducing my strategies, let’s review common feature engineering problems first:</p>
 <ul>
@@ -264,195 +232,188 @@
 <h1 id="Conclusion"><a href="#Conclusion" class="headerlink" title="Conclusion"></a>Conclusion</h1><p>This is just simple introduction to give a thought how to do feature engineering in an elegant way. I believe there are still many awesome tricks can help us create machine learning pipelines with simple code. With survey the documentation and API design in scikit-learn, I enjoy their thoughts on machine learning development and think that is pretty worth to follow them.</p>
 
     </div>
-
-    
-    
-    
-
-      <footer class="post-footer">
-          <div class="post-tags">
-              <a href="/tags/python/" rel="tag"># python</a>
-              <a href="/tags/machine-learning/" rel="tag"># machine-learning</a>
-              <a href="/tags/scikit-learn/" rel="tag"># scikit-learn</a>
-          </div>
-
-        
+     
+    <div class="post-footer__meta"><p>更新於 2021-09-19</p></div> 
+    <div class="post-entry__tags"><a href="/tags/python/" class="post-tags__link button"># python</a><a href="/tags/machine-learning/" class="post-tags__link button"># machine-learning</a><a href="/tags/scikit-learn/" class="post-tags__link button"># scikit-learn</a></div> 
+</article>
 
 
-        
-    <div class="post-nav">
-      <div class="post-nav-item">
-    <a href="/2020/03/29/graceful-data-ingestion-with-sqlalchemy-and-pands/" rel="prev" title="Graceful Data Ingestion with SQLAlchemy and Pandas">
-      <i class="fa fa-chevron-left"></i> Graceful Data Ingestion with SQLAlchemy and Pandas
-    </a></div>
-      <div class="post-nav-item">
-    <a href="/2020/03/29/deploy-private-github-python-packages-on-heroku-without-exposing-credentials/" rel="next" title="Deploy Private Github Python Packages on Heroku without Exposing Credentials">
-      Deploy Private Github Python Packages on Heroku without Exposing Credentials <i class="fa fa-chevron-right"></i>
-    </a></div>
+    <div class="nav">
+        <div class="nav__prev">
+            
+                <a href="/2020/03/29/deploy-private-github-python-packages-on-heroku-without-exposing-credentials/" class="nav__link">
+                    <div>
+                        <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" width="24" height="24"><path d="M589.088 790.624L310.464 512l278.624-278.624 45.248 45.248L400.96 512l233.376 233.376z" fill="#808080"></path></svg>
+                    </div>
+                    <div>
+                        <div class="nav__label">
+                            上一篇
+                        </div>
+                        <div class="nav__title">
+                            Deploy Private Github Python Packages on Heroku without Exposing Credentials
+                        </div>
+                    </div>
+                </a>
+            
+        </div>
+        <div class="nav__next">
+            
+                <a href="/2020/03/29/graceful-data-ingestion-with-sqlalchemy-and-pands/" class="nav__link">
+                    <div>
+                        <div class="nav__label">
+                            下一篇
+                        </div>
+                        <div class="nav__title">
+                            Graceful Data Ingestion with SQLAlchemy and Pandas
+                        </div>
+                    </div>
+                    <div>
+                        <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" width="24" height="24"><path d="M434.944 790.624l-45.248-45.248L623.04 512l-233.376-233.376 45.248-45.248L713.568 512z" fill="#808080"></path></svg>
+                    </div>
+                </a>
+            
+        </div>
     </div>
-      </footer>
+
+
+
+    <div class="post__comments content-card" id="comment">
+        
+    <h4>評論</h4>
     
-  </article>
-  
-  
-  
+    <div id="disqus_thread">無法加載 Disqus 評論系統，請確保您的網絡能夠正常訪問。</div>
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+
+    </div>
 
 
 
-          </div>
-          
+</main>
 
-<script>
-  window.addEventListener('tabs:register', () => {
-    let { activeClass } = CONFIG.comments;
-    if (CONFIG.comments.storage) {
-      activeClass = localStorage.getItem('comments_active') || activeClass;
-    }
-    if (activeClass) {
-      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
-      if (activeTab) {
-        activeTab.click();
-      }
-    }
-  });
-  if (CONFIG.comments.storage) {
-    window.addEventListener('tabs:click', event => {
-      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
-      let commentClass = event.target.classList[1];
-      localStorage.setItem('comments_active', commentClass);
-    });
-  }
-</script>
+            <footer class="footer">
+    
+    
+
+
+    
+     
+ 
+
+ 
+    
+        
+        <p class="footer-copyright">
+            Copyright © 2023 <a href="/">魯斯雜想</a>
+        </p>
+    
+    
+    <p>Powered by <a href="https://hexo.io" target="_blank">Hexo</a> | Theme - <a href="https://github.com/ChrAlpha/hexo-theme-cards" target="_blank">Cards</a></p>
+</footer>
 
         </div>
-          
-  
-  <div class="toggle sidebar-toggle">
-    <span class="toggle-line toggle-line-first"></span>
-    <span class="toggle-line toggle-line-middle"></span>
-    <span class="toggle-line toggle-line-last"></span>
-  </div>
+         
 
-  <aside class="sidebar">
-    <div class="sidebar-inner">
+ 
 
-      <ul class="sidebar-nav motion-element">
-        <li class="sidebar-nav-toc">
-          文章目錄
-        </li>
-        <li class="sidebar-nav-overview">
-          本站概要
-        </li>
-      </ul>
+ 
 
-      <!--noindex-->
-      <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Idea-1-Naive-Feature-Engineering"><span class="nav-number">1.</span> <span class="nav-text">Idea 1. Naive Feature Engineering</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Code-Example"><span class="nav-number">1.1.</span> <span class="nav-text">Code Example</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Pros"><span class="nav-number">1.2.</span> <span class="nav-text">Pros</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Cons"><span class="nav-number">1.3.</span> <span class="nav-text">Cons</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Idea-2-Scikit-Learn-Model-Pipeline"><span class="nav-number">2.</span> <span class="nav-text">Idea 2. Scikit Learn Model Pipeline</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Code-Example-1"><span class="nav-number">2.1.</span> <span class="nav-text">Code Example</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Pros-1"><span class="nav-number">2.2.</span> <span class="nav-text">Pros</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Cons-1"><span class="nav-number">2.3.</span> <span class="nav-text">Cons</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Idea-3-Feature-Union-with-Pipeline"><span class="nav-number">3.</span> <span class="nav-text">Idea 3. Feature Union with Pipeline</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Code-Example-2"><span class="nav-number">3.1.</span> <span class="nav-text">Code Example</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Pros-2"><span class="nav-number">3.2.</span> <span class="nav-text">Pros</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Cons-2"><span class="nav-number">3.3.</span> <span class="nav-text">Cons</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Idea-4-Idea-3-Column-Transformer"><span class="nav-number">4.</span> <span class="nav-text">Idea 4. Idea 3 + Column Transformer</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Code-Example-3"><span class="nav-number">4.1.</span> <span class="nav-text">Code Example</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Pros-3"><span class="nav-number">4.2.</span> <span class="nav-text">Pros</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Cons-3"><span class="nav-number">4.3.</span> <span class="nav-text">Cons</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#More-tricks-in-your-pipeline"><span class="nav-number">5.</span> <span class="nav-text">More tricks in your pipeline</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Stacking-ensemble-methods-in-a-pipeline"><span class="nav-number">5.1.</span> <span class="nav-text">Stacking ensemble methods in a pipeline</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Quickly-adapt-neural-network-model-with-Keras-API"><span class="nav-number">5.2.</span> <span class="nav-text">Quickly adapt neural network model with Keras API</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Conclusion"><span class="nav-number">6.</span> <span class="nav-text">Conclusion</span></a></li></ol></div>
-      </div>
-      <!--/noindex-->
+ 
 
-      <div class="site-overview-wrap sidebar-panel">
-        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
-  <p class="site-author-name" itemprop="name">bruce3557</p>
-  <div class="site-description" itemprop="description"></div>
-</div>
-<div class="site-state-wrap motion-element">
-  <nav class="site-state">
-      <div class="site-state-item site-state-posts">
-          <a href="/archives/">
-        
-          <span class="site-state-item-count">13</span>
-          <span class="site-state-item-name">文章</span>
-        </a>
-      </div>
-      <div class="site-state-item site-state-tags">
-            <a href="/tags/">
-        <span class="site-state-item-count">18</span>
-        <span class="site-state-item-name">標籤</span></a>
-      </div>
-  </nav>
-</div>
+ 
 
 
 
-      </div>
-
-    </div>
-  </aside>
-  <div id="sidebar-dimmer"></div>
-
-
-      </div>
-    </main>
-
-    <footer class="footer">
-      <div class="footer-inner">
-        
-
-        
-
-<div class="copyright">
-  
-  &copy; 
-  <span itemprop="copyrightYear">2023</span>
-  <span class="with-love">
-    <i class="fa fa-heart"></i>
-  </span>
-  <span class="author" itemprop="copyrightHolder">bruce3557</span>
-</div>
-  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 強力驅動
-  </div>
-
-        
+ 
 
 
 
+ 
+
+
+    
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+
+    
+    <script>
+        function loadComment() {
+            window.disqus_config = function () {
+                this.page.url = 'http://bruce3557.github.io/2020/03/29/beautiful-machine-learning-pipeline-with-scikit-learn/';
+                this.page.identifier = '2020/03/29/beautiful-machine-learning-pipeline-with-scikit-learn/';
+            };
+            (function(){
+                var dsq = document.createElement('script');
+                dsq.type = 'text/javascript';
+                dsq.async = true;
+                dsq.src = '//' + '魯斯雜想' + '.disqus.com/embed.js';
+                (document.head || document.body).appendChild(dsq);
+            })();
+        }
+    
+        var runningOnBrowser = typeof window !== "undefined";
+        var isBot = runningOnBrowser && !("onscroll" in window) || typeof navigator !== "undefined" && /(gle|ing|ro|msn)bot|crawl|spider|yand|duckgo/i.test(navigator.userAgent);
+        var supportsIntersectionObserver = runningOnBrowser && "IntersectionObserver" in window;
+    
+        setTimeout(function () {
+            if (!isBot && supportsIntersectionObserver) {
+                var comment_observer = new IntersectionObserver(function(entries) {
+                    if (entries[0].isIntersecting) {
+                        loadComment();
+                        comment_observer.disconnect();
+                    }
+                }, { threshold: [0] });
+                comment_observer.observe(document.getElementById('comment'));
+            } else {
+                loadComment();
+            }
+        }, 1);
+    </script>
+
+
+    
+
+    
+    
+
+    
+    
+    
+    
+    
+
+    
+    
+    
+    
+    
+
+    
+    
+    
 
 
 
-
-
-      </div>
-    </footer>
-  </div>
-
-  
-  <script src="/lib/anime.min.js"></script>
-  <script src="/lib/velocity/velocity.min.js"></script>
-  <script src="/lib/velocity/velocity.ui.min.js"></script>
-
-<script src="/js/utils.js"></script>
-
-<script src="/js/motion.js"></script>
-
-
-<script src="/js/schemes/muse.js"></script>
-
-
-<script src="/js/next-boot.js"></script>
-
-
-
-
-  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  
-
-  
-
-</body>
+    </body>
 </html>
